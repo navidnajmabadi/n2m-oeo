@@ -24,6 +24,10 @@
     --text-faint:#716D68;
     --green:#3FCF8E;
     --amber:#E8B339;
+    --grade-a:#EF3B3B;
+    --grade-b:#F2872B;
+    --grade-c:#F0D23E;
+    --grade-d:#8A857C;
     --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;--space-7:48px;--space-8:64px;
     --radius-s:8px;--radius-m:14px;--radius-l:22px;
     --font-display:'Space Grotesk',sans-serif;
@@ -146,10 +150,10 @@
   .country{stroke:rgba(5,5,6,0.7);stroke-width:1;cursor:pointer;transition:filter .15s ease, opacity .15s ease;}
   .country:hover,.country:focus-visible{filter:brightness(1.35) drop-shadow(0 0 6px currentColor);outline:none;}
   .country.active{filter:brightness(1.5) drop-shadow(0 0 10px currentColor);}
-  .country.grade-A{fill:var(--red-bright);color:var(--red-bright);}
-  .country.grade-B{fill:var(--red);color:var(--red);}
-  .country.grade-C{fill:var(--amber);color:var(--amber);}
-  .country.grade-D,.country.grade-F{fill:#8a857c;color:#8a857c;}
+  .country.grade-A{fill:var(--grade-a);color:var(--grade-a);}
+  .country.grade-B{fill:var(--grade-b);color:var(--grade-b);}
+  .country.grade-C{fill:var(--grade-c);color:var(--grade-c);}
+  .country.grade-D,.country.grade-F{fill:var(--grade-d);color:var(--grade-d);}
 
   .map-legend{position:absolute;left:16px;bottom:16px;display:flex;gap:14px;flex-wrap:wrap;
     background:rgba(5,5,6,0.55);backdrop-filter:blur(6px);padding:8px 12px;border-radius:999px;border:1px solid var(--panel-border);
@@ -181,10 +185,10 @@
     font-family:var(--font-mono);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;
     border:1px solid transparent;
   }
-  .grade-badge.grade-A{background:rgba(255,91,60,0.16);color:var(--red-bright);border-color:rgba(255,91,60,0.4);}
-  .grade-badge.grade-B{background:rgba(228,71,42,0.14);color:var(--red);border-color:rgba(228,71,42,0.35);}
-  .grade-badge.grade-C{background:rgba(232,179,57,0.14);color:var(--amber);border-color:rgba(232,179,57,0.35);}
-  .grade-badge.grade-D,.grade-badge.grade-F{background:rgba(255,255,255,0.06);color:var(--text-faint);border-color:var(--panel-border);}
+  .grade-badge.grade-A{background:rgba(239,59,59,0.16);color:var(--grade-a);border-color:rgba(239,59,59,0.4);}
+  .grade-badge.grade-B{background:rgba(242,135,43,0.16);color:var(--grade-b);border-color:rgba(242,135,43,0.4);}
+  .grade-badge.grade-C{background:rgba(240,210,62,0.16);color:var(--grade-c);border-color:rgba(240,210,62,0.4);}
+  .grade-badge.grade-D,.grade-badge.grade-F{background:rgba(255,255,255,0.06);color:var(--grade-d);border-color:var(--panel-border);}
 
   /* ---------- Detail drawer ---------- */
   .drawer-overlay{position:fixed;inset:0;background:rgba(2,2,3,0.6);backdrop-filter:blur(3px);z-index:80;opacity:0;pointer-events:none;transition:opacity .25s;}
@@ -206,7 +210,26 @@
   .metric{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius-s);padding:12px;}
   .metric .k{font-family:var(--font-mono);font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;}
   .metric .v{font-family:var(--font-display);font-size:19px;font-weight:700;margin-top:3px;}
-  .metric .v.red{color:var(--red-bright);}
+  .back-link{
+    display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--text-dim);
+    font-family:var(--font-mono);font-size:12px;padding:0;margin-bottom:14px;cursor:pointer;transition:color .15s;
+  }
+  .back-link:hover{color:var(--red-bright);}
+  .tag-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .tag{
+    display:inline-block;font-family:var(--font-mono);font-size:10.5px;color:var(--text-dim);
+    background:rgba(255,255,255,0.06);border:1px solid var(--panel-border);border-radius:999px;padding:3px 9px;
+  }
+  .problem-list{display:flex;flex-direction:column;gap:8px;}
+  .problem-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;
+    background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius-s);
+    padding:12px 14px;cursor:pointer;transition:background .15s,border-color .15s;color:var(--text);min-height:44px;
+  }
+  .problem-row:hover,.problem-row:focus-visible{background:rgba(228,71,42,0.08);border-color:rgba(228,71,42,0.3);outline:none;}
+  .pr-title{font-size:13.5px;font-weight:500;margin-bottom:6px;}
+  .pr-tags{display:flex;flex-wrap:wrap;gap:5px;}
+  .problem-row .grade-badge{flex-shrink:0;}
   .drawer section{margin-bottom:var(--space-4);}
   .drawer h3{font-family:var(--font-display);font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);margin-bottom:8px;}
   .drawer p{font-size:14px;color:var(--text);}
@@ -240,6 +263,27 @@
   .recommend.no{background:rgba(255,255,255,0.06);color:var(--text-dim);border:1px solid var(--panel-border);}
 
   /* ---------- Rankings ---------- */
+  .rank-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:var(--space-4);}
+  .rank-search{
+    flex:1 1 220px;background:var(--panel);border:1px solid var(--panel-border);border-radius:999px;
+    padding:10px 16px;color:var(--text);font-family:var(--font-body);font-size:13.5px;min-height:44px;
+  }
+  .rank-search::placeholder{color:var(--text-faint);}
+  .rank-search:focus-visible{outline:2px solid var(--red-bright);outline-offset:1px;}
+  .rank-select{
+    background:var(--panel);border:1px solid var(--panel-border);border-radius:999px;color:var(--text);
+    font-family:var(--font-body);font-size:13.5px;padding:10px 14px;min-height:44px;cursor:pointer;
+  }
+  .rank-select:focus-visible{outline:2px solid var(--red-bright);outline-offset:1px;}
+  .rank-result-count{font-family:var(--font-mono);font-size:11px;color:var(--text-faint);flex-basis:100%;}
+  .tag-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:var(--space-4);}
+  .tag-chip{
+    background:var(--panel);border:1px solid var(--panel-border);border-radius:999px;color:var(--text-dim);
+    font-family:var(--font-mono);font-size:11.5px;padding:7px 13px;cursor:pointer;transition:all .15s;min-height:36px;
+  }
+  .tag-chip:hover{border-color:rgba(228,71,42,0.4);color:var(--text);}
+  .tag-chip.active{background:var(--red);border-color:var(--red);color:#fff;}
+  .tag-chip:focus-visible{outline:2px solid var(--red-bright);outline-offset:1px;}
   .rank-table-wrap{border:1px solid var(--panel-border);border-radius:var(--radius-l);background:var(--panel);overflow:hidden;}
   table.rank-table{width:100%;border-collapse:collapse;font-size:13.5px;}
   table.rank-table thead th{
@@ -354,8 +398,8 @@
   <section class="view active" id="view-map" role="tabpanel">
     <div class="page-head">
       <h1>Trend Problems — World Map</h1>
-      <p>AI-diagnosed business & workforce problems by market. Click a highlighted country to open its ranked brief.</p>
-      <div class="last-updated">Last scan: <b id="lastUpdated">—</b> · <span id="countryCount">0</span> markets tracked</div>
+      <p>AI-diagnosed business & workforce problems by market. Click a highlighted country to see its full list of trend problems.</p>
+      <div class="last-updated">Last scan: <b id="lastUpdated">—</b> · <span id="countryCount">0</span> markets · <span id="problemCount">0</span> problems diagnosed</div>
     </div>
     <div class="map-layout">
       <div class="map-card">
@@ -365,10 +409,10 @@
         </svg>
         <div class="map-tooltip" id="mapTooltip"></div>
         <div class="map-legend">
-          <span><i style="background:var(--red-bright)"></i>Grade A</span>
-          <span><i style="background:var(--red)"></i>Grade B</span>
-          <span><i style="background:var(--amber)"></i>Grade C</span>
-          <span><i style="background:var(--text-faint)"></i>Grade D/F</span>
+          <span><i style="background:var(--grade-a)"></i>Grade A · Urgent</span>
+          <span><i style="background:var(--grade-b)"></i>Grade B</span>
+          <span><i style="background:var(--grade-c)"></i>Grade C</span>
+          <span><i style="background:var(--grade-d)"></i>Grade D/F</span>
         </div>
       </div>
       <div class="side-panel" id="regionPanel"></div>
@@ -379,9 +423,15 @@
   <section class="view" id="view-rankings" role="tabpanel">
     <div class="page-head">
       <h1>Priority Ranking</h1>
-      <p>Every diagnosed problem, scored on demand, feasibility, go-to-market ease and competitive openness. Sort any column.</p>
+      <p>Every diagnosed problem, scored on demand, feasibility, go-to-market ease and competitive openness. Search, filter, and sort any column.</p>
       <div class="last-updated">Weighted score = demand + feasibility + GTM ease + white-space − competition</div>
     </div>
+    <div class="rank-filters">
+      <input type="text" class="rank-search" id="rankSearch" placeholder="Search problems, markets, categories, tags…" autocomplete="off">
+      <select class="rank-select" id="rankCountrySelect"><option value="">All markets</option></select>
+      <span class="rank-result-count" id="rankResultCount"></span>
+    </div>
+    <div class="tag-filters" id="tagFilters"></div>
     <div class="rank-table-wrap">
       <div class="rt-scroll">
         <table class="rank-table" id="rankTable">
@@ -391,6 +441,7 @@
               <th data-sort="country">Market</th>
               <th data-sort="problem">Trend Problem</th>
               <th data-sort="category">Category</th>
+              <th>Tags</th>
               <th data-sort="score">Score</th>
               <th data-sort="grade">Grade</th>
               <th data-sort="tam">TAM</th>
@@ -438,7 +489,7 @@
     </div>
 
     <div class="config-note">
-      <b style="color:var(--text);">Wiring this up live:</b> data on this page is a seeded demo dataset, not a live feed. To connect it to your OpenAI key on GitHub, set <code>CONFIG.OPENAI_API_KEY</code> and <code>CONFIG.USE_LIVE_AI = true</code> at the top of the script in <code>index.html</code>. Keep the key out of a public repo — use a private repo or a small serverless proxy so the key isn't exposed client-side.
+      <b style="color:var(--text);">Wiring this up live:</b> data on this page is a seeded demo dataset, not a live feed. The OpenAI key is never stored in this repo — deploy the Cloudflare Worker in <code>worker/</code> (it holds the key server-side), then set <code>CONFIG.WORKER_URL</code> and <code>CONFIG.USE_LIVE_AI = true</code> at the top of the script in <code>index.html</code>.
     </div>
   </section>
 
@@ -458,12 +509,12 @@
   "use strict";
 
   /* =========================================================
-     CONFIG — wire your own OpenAI key here once hosted on GitHub.
-     Never commit a real key to a public repo.
+     CONFIG — no API key lives here. The brief generator calls a
+     Cloudflare Worker (see worker/) that holds the OpenAI key
+     server-side. Deploy the worker, then paste its URL below.
   ========================================================== */
   const CONFIG = {
-    OPENAI_API_KEY: "",
-    OPENAI_MODEL: "gpt-4o-mini",
+    WORKER_URL: "", // e.g. "https://n2m-brief-proxy.<your-subdomain>.workers.dev"
     USE_LIVE_AI: false
   };
 
@@ -517,36 +568,42 @@
 
   /* ---------------- Data ---------------- */
   const CATEGORY_POOL = [
-    {cat:"AI Commoditization", title:"AI feature parity is collapsing SaaS pricing power",
+    {cat:"AI Commoditization", tags:["Product","Strategy","SaaS"], title:"AI feature parity is collapsing SaaS pricing power",
      desc:"Competing products ship near-identical AI features within weeks, so buyers stop paying a premium for “AI-powered” and switch on price alone.",
      tam:420, sol:"A workflow-depth layer (not a feature) that locks in switching cost — proprietary data, integrations and outcomes tracking a generic AI wrapper can't copy overnight."},
-    {cat:"Compliance Overload", title:"New AI & data regulation is burying SMBs in compliance work",
+    {cat:"Compliance Overload", tags:["Compliance","Legal","Ops"], title:"New AI & data regulation is burying SMBs in compliance work",
      desc:"Owners without legal teams can't keep pace with fast-moving AI, privacy and data-residency rules, and are stalling adoption out of fear of penalties.",
      tam:180, sol:"A managed compliance-as-a-service layer: templated policies, audit trails and plain-language guidance sized for teams under 200 people."},
-    {cat:"Talent Mismatch", title:"Skilled-labor shortages are stalling SMB growth plans",
+    {cat:"Talent Mismatch", tags:["HR","Hiring","Ops"], title:"Skilled-labor shortages are stalling SMB growth plans",
      desc:"Demand for technical and trade skills is outpacing local supply, forcing owners to slow expansion or overpay for scarce talent.",
      tam:260, sol:"A vetted, on-demand talent marketplace paired with short applied-skills certification, priced below traditional staffing agencies."},
-    {cat:"Payment Friction", title:"Cross-border payment friction is blocking SMB export growth",
+    {cat:"Payment Friction", tags:["Finance","Sales","Payments"], title:"Cross-border payment friction is blocking SMB export growth",
      desc:"FX spreads, settlement delays and compliance checks make it hard for small exporters to get paid quickly and predictably.",
      tam:310, sol:"A multi-currency settlement product with transparent FX and same-week payout, undercutting bank wire costs for SMB exporters."},
-    {cat:"Customer Support Cost", title:"Support costs are outpacing revenue as expectations rise",
+    {cat:"Customer Support Cost", tags:["Support","CX","Ops"], title:"Support costs are outpacing revenue as expectations rise",
      desc:"Customers now expect instant, multi-channel support, but headcount costs scale faster than revenue for lean teams.",
      tam:150, sol:"A support co-pilot trained on the business's own history that resolves the routine 70% and hands off the rest with full context."},
-    {cat:"Supply Chain Visibility", title:"SMBs lack real-time visibility into supplier risk",
+    {cat:"Supply Chain Visibility", tags:["Supply Chain","Ops","Risk"], title:"SMBs lack real-time visibility into supplier risk",
      desc:"Small operators find out about delays and shortages only after they hit revenue, with no early-warning signal from suppliers.",
      tam:220, sol:"A lightweight supplier-risk monitor that flags delay signals from public shipping, customs and news data before they hit the business."},
-    {cat:"Energy Cost Volatility", title:"Volatile energy costs are squeezing thin-margin operators",
+    {cat:"Energy Cost Volatility", tags:["Finance","Ops","Sustainability"], title:"Volatile energy costs are squeezing thin-margin operators",
      desc:"Unpredictable energy pricing erodes margins for physical-goods and hospitality businesses that can't easily pass costs to customers.",
      tam:140, sol:"A usage-and-tariff optimization tool that recommends load-shifting and contract timing to cut energy spend without capex."},
-    {cat:"Digital Trust", title:"Rising fraud and deepfake risk is eroding digital trust",
+    {cat:"Digital Trust", tags:["Trust & Safety","Security","CX"], title:"Rising fraud and deepfake risk is eroding digital trust",
      desc:"Synthetic identity and deepfake fraud are increasing chargeback and reputational risk faster than SMB fraud tooling can adapt.",
      tam:200, sol:"A lightweight identity-verification and anomaly layer sized for SMB checkout and onboarding flows, priced per verification."},
-    {cat:"Localization Gap", title:"Global platforms underserve local language & regulatory nuance",
+    {cat:"Localization Gap", tags:["Marketing","Sales","Product"], title:"Global platforms underserve local language & regulatory nuance",
      desc:"Owners expanding into new markets find major platforms don't handle local language, tax or compliance nuance well enough to trust.",
      tam:95, sol:"A localization layer that plugs into existing platforms to handle local language, tax rules and payment norms per market."},
-    {cat:"Retention Crisis", title:"Employee retention costs are eating into SMB profitability",
+    {cat:"Retention Crisis", tags:["HR","Ops","Retention"], title:"Employee retention costs are eating into SMB profitability",
      desc:"Replacing skilled staff now costs 6-9 months of salary in lost productivity and hiring — small teams feel this hardest.",
-     tam:130, sol:"A retention-signal tool that flags flight-risk earlier from engagement and workload data, paired with lightweight manager playbooks."}
+     tam:130, sol:"A retention-signal tool that flags flight-risk earlier from engagement and workload data, paired with lightweight manager playbooks."},
+    {cat:"Pipeline Stagnation", tags:["Sales","Marketing","Growth"], title:"Outbound sales pipelines are drying up as buyers self-serve research",
+     desc:"Buyers now do most of their research before ever talking to sales, so cold outbound conversion keeps falling while CAC keeps rising.",
+     tam:275, sol:"An intent-signal layer that surfaces which accounts are actively researching the problem right now, so outreach lands at the right moment."},
+    {cat:"Demand Gen Attribution", tags:["Marketing","Analytics","Growth"], title:"Marketing can't prove which campaigns actually drive revenue",
+     desc:"Fragmented tracking across channels leaves marketers unable to tie spend to pipeline, so budget keeps getting cut in downturns.",
+     tam:165, sol:"A lightweight, privacy-safe attribution layer that ties campaign touches to closed revenue without needing a full data-warehouse build."}
   ];
 
   // code, name, region, lat, lon, approx GDP (US$B, rounded, for demo SAM estimation only)
@@ -616,31 +673,32 @@
 
   function buildDataset(seed){
     const items = [];
-    COUNTRIES.forEach((c, i)=>{
+    COUNTRIES.forEach((c)=>{
       const [code,name,region,lat,lon,gdp] = c;
-      const rnd = hashSeed(seed+"-"+code);
-      const tpl = CATEGORY_POOL[i % CATEGORY_POOL.length];
-      const demand = 1 + rnd()*4;
-      const feasibility = 1 + rnd()*4;
-      const gtmEase = 1 + rnd()*4;
-      const whiteSpace = 1 + rnd()*4; // inverse of competition
-      const founderFit = 1 + rnd()*4;
-      const raw = (demand*1.2 + feasibility + gtmEase + whiteSpace + founderFit*0.8) / (1.2+1+1+1+0.8) / 5 * 100;
-      const score = Math.round(Math.min(99, Math.max(18, raw)));
-      const g = grade(score);
-      const sam = Math.max(1, Math.round(tpl.tam * (gdp/WORLD_GDP) * (0.35 + rnd()*0.4)));
       const incomeTier = gdp>2000?"High":gdp>600?"Upper-Mid":gdp>200?"Mid":"Emerging";
       const urbanTier = gdp>1500?"70-90% urban":gdp>400?"55-75% urban":"35-60% urban";
-      items.push({
-        id: code+"-"+i,
-        code, country:name, region, lat, lon,
-        category: tpl.cat, title: tpl.title, desc: tpl.desc, solution: tpl.sol,
-        tam: tpl.tam, sam,
-        demand, feasibility, gtmEase, whiteSpace, founderFit,
-        score, grade:g,
-        persona: incomeTier==="High"?"Ops / growth lead at an SMB or mid-market company":"Owner-operator running a lean team",
-        ageRange: "32–48",
-        incomeTier, urbanTier
+      CATEGORY_POOL.forEach((tpl, ci)=>{
+        const rnd = hashSeed(seed+"-"+code+"-"+ci);
+        const demand = 1 + rnd()*4;
+        const feasibility = 1 + rnd()*4;
+        const gtmEase = 1 + rnd()*4;
+        const whiteSpace = 1 + rnd()*4; // inverse of competition
+        const founderFit = 1 + rnd()*4;
+        const raw = (demand*1.2 + feasibility + gtmEase + whiteSpace + founderFit*0.8) / (1.2+1+1+1+0.8) / 5 * 100;
+        const score = Math.round(Math.min(99, Math.max(18, raw)));
+        const g = grade(score);
+        const sam = Math.max(1, Math.round(tpl.tam * (gdp/WORLD_GDP) * (0.35 + rnd()*0.4)));
+        items.push({
+          id: code+"-"+ci,
+          code, country:name, region, lat, lon,
+          category: tpl.cat, tags: tpl.tags, title: tpl.title, desc: tpl.desc, solution: tpl.sol,
+          tam: tpl.tam, sam,
+          demand, feasibility, gtmEase, whiteSpace, founderFit,
+          score, grade:g,
+          persona: incomeTier==="High"?"Ops / growth lead at an SMB or mid-market company":"Owner-operator running a lean team",
+          ageRange: "32–48",
+          incomeTier, urbanTier
+        });
       });
     });
     return items.sort((a,b)=>b.score-a.score);
@@ -669,6 +727,17 @@
     });
     bgRendered = true;
   }
+  /* Top (highest-score) problem per country — represents that market's headline opportunity */
+  function countrySummary(){
+    const map = {};
+    DATA.forEach(it=>{
+      if(!map[it.code] || it.score > map[it.code].score) map[it.code] = it;
+    });
+    return map;
+  }
+  function countryProblemCount(code){
+    return DATA.reduce((n,it)=> it.code===code ? n+1 : n, 0);
+  }
   function renderMap(){
     renderMapBackground();
     const layer = document.getElementById('countryLayer');
@@ -676,24 +745,29 @@
     const tracked = (window.WORLD_MAP_DATA && window.WORLD_MAP_DATA.tracked) || {};
     const tip = document.getElementById('mapTooltip');
     const card = document.querySelector('.map-card');
-    DATA.forEach(item=>{
-      const iso = item.code.toLowerCase();
+    const summary = countrySummary();
+    COUNTRIES.forEach(c=>{
+      const code = c[0];
+      const top = summary[code];
+      if(!top) return;
+      const iso = code.toLowerCase();
       const ds = tracked[iso];
       if(!ds || !ds.length) return;
+      const count = countryProblemCount(code);
       const g = document.createElementNS(SVG_NS,'g');
-      g.setAttribute('class', 'country grade-'+item.grade);
+      g.setAttribute('class', 'country grade-'+top.grade);
       g.setAttribute('tabindex','0');
       g.setAttribute('role','button');
-      g.setAttribute('aria-label', item.country+': '+item.title);
-      g.dataset.id = item.id;
+      g.setAttribute('aria-label', top.country+': '+count+' trend problems, top grade '+top.grade);
+      g.dataset.code = code;
       appendFragments(g, ds);
-      g.addEventListener('click', ()=>openDrawer(item.id));
-      g.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openDrawer(item.id); } });
+      g.addEventListener('click', ()=>openCountryList(code));
+      g.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openCountryList(code); } });
       g.addEventListener('mousemove', e=>{
         const rect = card.getBoundingClientRect();
         tip.style.left = (e.clientX-rect.left)+'px';
         tip.style.top = (e.clientY-rect.top)+'px';
-        tip.textContent = item.country+' · Grade '+item.grade+' · '+item.score;
+        tip.textContent = top.country+' · '+count+' problems · Top grade '+top.grade;
         tip.classList.add('show');
       });
       g.addEventListener('mouseleave', ()=> tip.classList.remove('show'));
@@ -703,8 +777,14 @@
 
   /* ---------------- Render: Region list ---------------- */
   function renderRegionPanel(){
+    const summary = countrySummary();
     const regions = {};
-    DATA.forEach(it=>{ (regions[it.region] = regions[it.region]||[]).push(it); });
+    COUNTRIES.forEach(c=>{
+      const [code,name,region] = c;
+      const top = summary[code];
+      if(!top) return;
+      (regions[region] = regions[region]||[]).push(top);
+    });
     const order = ["North America","Europe","South America","Asia","Middle East","Africa"];
     const panel = document.getElementById('regionPanel');
     panel.innerHTML = "";
@@ -713,16 +793,16 @@
       const details = document.createElement('details');
       details.className = "region-list";
       if(i===0) details.open = true;
-      const summary = document.createElement('summary');
-      summary.innerHTML = `<span>${r}</span><span class="count">${list.length} markets</span>`;
-      details.appendChild(summary);
+      const summaryEl = document.createElement('summary');
+      summaryEl.innerHTML = `<span>${r}</span><span class="count">${list.length} markets</span>`;
+      details.appendChild(summaryEl);
       list.forEach(it=>{
         const row = document.createElement('div');
         row.className = "region-country";
         row.tabIndex = 0;
         row.innerHTML = `<span class="name">${it.country}</span><span class="grade-badge grade-${it.grade}">${it.grade} · ${it.score}</span>`;
-        row.addEventListener('click', ()=>openDrawer(it.id));
-        row.addEventListener('keydown', e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openDrawer(it.id);} });
+        row.addEventListener('click', ()=>openCountryList(it.code));
+        row.addEventListener('keydown', e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openCountryList(it.code);} });
         details.appendChild(row);
       });
       panel.appendChild(details);
@@ -731,9 +811,51 @@
 
   /* ---------------- Render: Rankings table ---------------- */
   let sortState = {key:"score", dir:1};
+  let filters = {q:"", country:"", tags:new Set()};
+
+  function allTags(){
+    const set = new Set();
+    CATEGORY_POOL.forEach(tpl=> tpl.tags.forEach(t=>set.add(t)));
+    return [...set].sort();
+  }
+  function populateFilterControls(){
+    const sel = document.getElementById('rankCountrySelect');
+    const existing = new Set([...sel.options].map(o=>o.value));
+    [...COUNTRIES].sort((a,b)=>a[1].localeCompare(b[1])).forEach(c=>{
+      if(existing.has(c[0])) return;
+      const opt = document.createElement('option');
+      opt.value = c[0]; opt.textContent = c[1];
+      sel.appendChild(opt);
+    });
+    const tagWrap = document.getElementById('tagFilters');
+    if(tagWrap.children.length) return;
+    allTags().forEach(tag=>{
+      const chip = document.createElement('button');
+      chip.type = "button";
+      chip.className = "tag-chip";
+      chip.textContent = tag;
+      chip.addEventListener('click', ()=>{
+        if(filters.tags.has(tag)) filters.tags.delete(tag); else filters.tags.add(tag);
+        chip.classList.toggle('active');
+        renderRankings();
+      });
+      tagWrap.appendChild(chip);
+    });
+  }
+  function applyFilters(list){
+    return list.filter(it=>{
+      if(filters.country && it.code!==filters.country) return false;
+      if(filters.tags.size && !it.tags.some(t=>filters.tags.has(t))) return false;
+      if(filters.q){
+        const hay = (it.country+' '+it.title+' '+it.category+' '+it.tags.join(' ')).toLowerCase();
+        if(!hay.includes(filters.q)) return false;
+      }
+      return true;
+    });
+  }
   function renderRankings(){
     const body = document.getElementById('rankBody');
-    const rows = [...DATA];
+    const rows = applyFilters(DATA);
     const key = sortState.key;
     rows.sort((a,b)=>{
       let av,bv;
@@ -755,6 +877,7 @@
         <td>${it.country}</td>
         <td>${it.title}</td>
         <td class="num">${it.category}</td>
+        <td><div class="tag-row">${it.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></td>
         <td class="num">${it.score}</td>
         <td><span class="grade-badge grade-${it.grade}">${it.grade}</span></td>
         <td class="num">${fmtUSD(it.tam)}</td>
@@ -762,14 +885,23 @@
       tr.addEventListener('click', ()=>openDrawer(it.id));
       body.appendChild(tr);
     });
+    document.getElementById('rankResultCount').textContent = rows.length+" of "+DATA.length+" problems";
   }
-  document.querySelectorAll('#rankTable thead th').forEach(th=>{
+  document.querySelectorAll('#rankTable thead th[data-sort]').forEach(th=>{
     th.addEventListener('click', ()=>{
       const k = th.dataset.sort;
       sortState.dir = (sortState.key===k) ? sortState.dir*-1 : -1;
       sortState.key = k;
       renderRankings();
     });
+  });
+  document.getElementById('rankSearch').addEventListener('input', e=>{
+    filters.q = e.target.value.trim().toLowerCase();
+    renderRankings();
+  });
+  document.getElementById('rankCountrySelect').addEventListener('change', e=>{
+    filters.country = e.target.value;
+    renderRankings();
   });
 
   /* ---------------- Drawer ---------------- */
@@ -778,18 +910,57 @@
   const drawerContent = document.getElementById('drawerContent');
   let lastFocused = null;
 
-  function openDrawer(id){
+  function openDrawerBase(){
+    overlay.classList.add('open');
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden','false');
+    lastFocused = lastFocused || document.activeElement;
+    document.getElementById('drawerClose').focus();
+  }
+
+  function openCountryList(code){
+    const items = DATA.filter(d=>d.code===code).sort((a,b)=>b.score-a.score);
+    if(!items.length) return;
+    const country = items[0].country, region = items[0].region;
+    document.querySelectorAll('.country').forEach(p=>p.classList.toggle('active', p.dataset.code===code));
+    drawerContent.innerHTML = `
+      <div class="drawer-eyebrow">${region} · ${country}</div>
+      <h2>${items.length} trend problems</h2>
+      <div class="sub">Ranked by priority score for this market. Click one to open its full brief.</div>
+      <div class="problem-list">
+        ${items.map(it=>`
+          <button class="problem-row" data-id="${it.id}">
+            <div class="pr-main">
+              <div class="pr-title">${it.title}</div>
+              <div class="pr-tags">${it.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+            </div>
+            <span class="grade-badge grade-${it.grade}">${it.grade} · ${it.score}</span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+    drawerContent.querySelectorAll('.problem-row').forEach(row=>{
+      row.addEventListener('click', ()=>openDrawer(row.dataset.id, code));
+    });
+    lastFocused = document.activeElement;
+    openDrawerBase();
+  }
+
+  function openDrawer(id, fromCode){
     const it = DATA.find(d=>d.id===id);
     if(!it) return;
-    document.querySelectorAll('.country').forEach(p=>p.classList.toggle('active', p.dataset.id===id));
+    document.querySelectorAll('.country').forEach(p=>p.classList.toggle('active', p.dataset.code===it.code));
     const rec = recommendation(it.grade);
+    const backCode = fromCode || it.code;
     drawerContent.innerHTML = `
+      <button class="back-link" id="backToList">← All ${it.country} problems</button>
       <div class="drawer-eyebrow">${it.region} · ${it.country}</div>
       <h2>${it.title}</h2>
       <div class="sub">${it.desc}</div>
+      <div class="tag-row" style="margin-bottom:14px;">${it.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
 
       <div class="metric-grid">
-        <div class="metric"><div class="k">Grade</div><div class="v red">${it.grade}</div></div>
+        <div class="metric"><div class="k">Grade</div><div class="v" style="color:var(--grade-${it.grade==='F'?'d':it.grade.toLowerCase()})">${it.grade}</div></div>
         <div class="metric"><div class="k">Priority Score</div><div class="v">${it.score}/100</div></div>
         <div class="metric"><div class="k">TAM (global)</div><div class="v">${fmtUSD(it.tam)}</div></div>
         <div class="metric"><div class="k">SAM (${it.country})</div><div class="v">${fmtUSD(it.sam)}</div></div>
@@ -827,16 +998,13 @@
         <h3>Generate a tailored brief</h3>
         <textarea class="brief-input" id="briefInput" placeholder="Add constraints or context — budget, team size, timeline, target segment..."></textarea>
         <button class="gen-btn" id="genBtn">Generate Tailored Brief</button>
-        <div class="ai-note">${CONFIG.USE_LIVE_AI && CONFIG.OPENAI_API_KEY ? "Live mode: calls your configured OpenAI key." : "Demo mode: no API key configured — generating a local templated brief. Set CONFIG.OPENAI_API_KEY to go live."}</div>
+        <div class="ai-note">${CONFIG.USE_LIVE_AI && CONFIG.WORKER_URL ? "Live mode: calls your deployed brief-generator worker." : "Demo mode: worker not configured — generating a local templated brief. Set CONFIG.WORKER_URL and USE_LIVE_AI to go live."}</div>
         <div class="ai-output" id="aiOutput"></div>
       </section>
     `;
     document.getElementById('genBtn').addEventListener('click', ()=>generateBrief(it));
-    overlay.classList.add('open');
-    drawer.classList.add('open');
-    drawer.setAttribute('aria-hidden','false');
-    lastFocused = document.activeElement;
-    document.getElementById('drawerClose').focus();
+    document.getElementById('backToList').addEventListener('click', ()=>openCountryList(backCode));
+    openDrawerBase();
   }
   function scoreRow(label, val){
     const pct = (val/5*100).toFixed(0);
@@ -848,6 +1016,7 @@
     drawer.setAttribute('aria-hidden','true');
     document.querySelectorAll('.country').forEach(p=>p.classList.remove('active'));
     if(lastFocused) lastFocused.focus();
+    lastFocused = null;
   }
   overlay.addEventListener('click', closeDrawer);
   document.getElementById('drawerClose').addEventListener('click', closeDrawer);
@@ -861,21 +1030,15 @@
     btn.disabled = true; btn.textContent = "Generating...";
     try{
       let text;
-      if(CONFIG.USE_LIVE_AI && CONFIG.OPENAI_API_KEY){
-        const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      if(CONFIG.USE_LIVE_AI && CONFIG.WORKER_URL){
+        const res = await fetch(CONFIG.WORKER_URL, {
           method:"POST",
-          headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+CONFIG.OPENAI_API_KEY },
-          body: JSON.stringify({
-            model: CONFIG.OPENAI_MODEL,
-            messages: [
-              {role:"system", content:"You are an analyst for N2M, a venture studio that turns trend problems into short, buildable MVP briefs. Be concise and concrete."},
-              {role:"user", content:`Problem: ${item.title} (${item.country}). ${item.desc} Constraints/context from the team: ${notes || "none given"}. Write a 4-6 sentence tailored MVP brief: what to build first, who the first customer is, and the first KPI to track.`}
-            ],
-            temperature: 0.6
-          })
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ title:item.title, country:item.country, desc:item.desc, notes })
         });
+        if(!res.ok) throw new Error("worker responded "+res.status);
         const json = await res.json();
-        text = json.choices?.[0]?.message?.content || "No response from model.";
+        text = json.text || "No response from model.";
       } else {
         await new Promise(r=>setTimeout(r, 650));
         text = `MVP brief — ${item.country}: ${item.solution} ${notes ? "Given your constraints (“"+notes+"”), scope the first build to a single channel and a single customer segment before expanding." : "Scope the first build to a single channel and segment before expanding."} First KPI to track in Develop → Track: activation rate within the first 14 days of signup, gated against a ${item.grade==="A"?"15%":item.grade==="B"?"10%":"6%"} target before scaling spend.`;
@@ -883,7 +1046,7 @@
       out.textContent = text;
       out.classList.add('show');
     }catch(err){
-      out.textContent = "Couldn't reach the AI service. Check CONFIG.OPENAI_API_KEY and network access, then try again.";
+      out.textContent = "Couldn't reach the brief-generator worker. Check CONFIG.WORKER_URL and that the worker is deployed, then try again.";
       out.classList.add('show');
     }finally{
       btn.disabled = false; btn.textContent = "Generate Tailored Brief";
@@ -907,7 +1070,9 @@
   }
   function fullRender(){
     DATA = buildDataset(GLOBAL_SEED);
-    document.getElementById('countryCount').textContent = DATA.length;
+    document.getElementById('countryCount').textContent = COUNTRIES.length;
+    document.getElementById('problemCount').textContent = DATA.length;
+    populateFilterControls();
     renderMap();
     renderRegionPanel();
     renderRankings();

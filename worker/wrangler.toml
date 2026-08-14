@@ -1,0 +1,8 @@
+name = "n2m-brief-proxy"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# Restrict who can call this worker (comma-separated allowed origins).
+# Set to your GitHub Pages URL after you know it, e.g. https://navidnajmabadi.github.io
+[vars]
+ALLOWED_ORIGIN = "https://navidnajmabadi.github.io"
