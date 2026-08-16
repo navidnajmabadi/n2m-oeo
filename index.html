@@ -76,7 +76,7 @@
     flex-wrap:wrap;
   }
   @media (max-width:768px){.topbar-inner{padding:12px var(--space-4);}}
-  @media (max-width:600px){
+  @media (max-width:900px){
     .topbar-inner{justify-content:center;}
     .brand{order:1;flex:1 1 auto;}
     .refresh-btn{order:2;}
@@ -154,6 +154,9 @@
   .country.grade-B{fill:var(--grade-b);color:var(--grade-b);}
   .country.grade-C{fill:var(--grade-c);color:var(--grade-c);}
   .country.grade-D,.country.grade-F{fill:var(--grade-d);color:var(--grade-d);}
+  .country.grade-pending{fill:#3a3733;color:#3a3733;}
+  .country.loading{fill:#544a3a;animation:diagnosePulse 1.1s ease-in-out infinite;}
+  @keyframes diagnosePulse{0%,100%{opacity:0.55;}50%{opacity:1;}}
 
   .map-legend{position:absolute;left:16px;bottom:16px;display:flex;gap:14px;flex-wrap:wrap;
     background:rgba(5,5,6,0.55);backdrop-filter:blur(6px);padding:8px 12px;border-radius:999px;border:1px solid var(--panel-border);
@@ -189,6 +192,7 @@
   .grade-badge.grade-B{background:rgba(242,135,43,0.16);color:var(--grade-b);border-color:rgba(242,135,43,0.4);}
   .grade-badge.grade-C{background:rgba(240,210,62,0.16);color:var(--grade-c);border-color:rgba(240,210,62,0.4);}
   .grade-badge.grade-D,.grade-badge.grade-F{background:rgba(255,255,255,0.06);color:var(--grade-d);border-color:var(--panel-border);}
+  .grade-badge.grade-pending{background:rgba(255,255,255,0.04);color:var(--text-faint);border-color:var(--panel-border);font-weight:400;}
 
   /* ---------- Detail drawer ---------- */
   .drawer-overlay{position:fixed;inset:0;background:rgba(2,2,3,0.6);backdrop-filter:blur(3px);z-index:80;opacity:0;pointer-events:none;transition:opacity .25s;}
@@ -240,6 +244,12 @@
   .demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;}
   .demo-grid div{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius-s);padding:10px;}
   .demo-grid .k{font-size:10.5px;color:var(--text-faint);font-family:var(--font-mono);text-transform:uppercase;}
+  .data-source-note{font-size:11px;color:var(--text-faint);margin-top:8px;line-height:1.5;}
+  .loading-spinner{
+    width:28px;height:28px;border-radius:50%;margin-top:20px;
+    border:3px solid rgba(255,255,255,0.12);border-top-color:var(--red-bright);
+    animation:spin .8s linear infinite;
+  }
   textarea.brief-input{
     width:100%;min-height:70px;background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius-s);
     color:var(--text);font-family:var(--font-body);font-size:13.5px;padding:10px;resize:vertical;
@@ -398,8 +408,8 @@
   <section class="view active" id="view-map" role="tabpanel">
     <div class="page-head">
       <h1>Trend Problems — World Map</h1>
-      <p>AI-diagnosed business & workforce problems by market. Click a highlighted country to see its full list of trend problems.</p>
-      <div class="last-updated">Last scan: <b id="lastUpdated">—</b> · <span id="countryCount">0</span> markets · <span id="problemCount">0</span> problems diagnosed</div>
+      <p>Live AI diagnosis by market, generated on demand — click a country to run real diagnosis via OpenAI. Demographics are live from the World Bank.</p>
+      <div class="last-updated">Last update: <b id="lastUpdated">—</b> · <span id="countryCount">0</span> markets tracked · <span id="problemCount">0</span> diagnosed live</div>
     </div>
     <div class="map-layout">
       <div class="map-card">
@@ -423,12 +433,13 @@
   <section class="view" id="view-rankings" role="tabpanel">
     <div class="page-head">
       <h1>Priority Ranking</h1>
-      <p>Every diagnosed problem, scored on demand, feasibility, go-to-market ease and competitive openness. Search, filter, and sort any column.</p>
+      <p>Every live-diagnosed problem, scored on demand, feasibility, go-to-market ease and competitive openness. Search, filter, and sort any column.</p>
       <div class="last-updated">Weighted score = demand + feasibility + GTM ease + white-space − competition</div>
     </div>
     <div class="rank-filters">
       <input type="text" class="rank-search" id="rankSearch" placeholder="Search problems, markets, categories, tags…" autocomplete="off">
       <select class="rank-select" id="rankCountrySelect"><option value="">All markets</option></select>
+      <button class="refresh-btn" id="diagnoseAllBtn" style="flex-shrink:0;">Diagnose All Markets</button>
       <span class="rank-result-count" id="rankResultCount"></span>
     </div>
     <div class="tag-filters" id="tagFilters"></div>
@@ -489,7 +500,7 @@
     </div>
 
     <div class="config-note">
-      <b style="color:var(--text);">Wiring this up live:</b> data on this page is a seeded demo dataset, not a live feed. The OpenAI key is never stored in this repo — deploy the Cloudflare Worker in <code>worker/</code> (it holds the key server-side), then set <code>CONFIG.WORKER_URL</code> and <code>CONFIG.USE_LIVE_AI = true</code> at the top of the script in <code>index.html</code>.
+      <b style="color:var(--text);">This is live, not a mockup:</b> problems, scores, TAM/SAM and solutions on this site are generated on demand by OpenAI (via a Cloudflare Worker that holds the key server-side — never in this repo). Demographic figures are fetched live from the World Bank Open Data API. Nothing is pre-written; every market is diagnosed fresh the first time you open it.
     </div>
   </section>
 
@@ -550,109 +561,52 @@
   requestAnimationFrame(drawStars);
   if(reduceMotion) drawStars(0);
 
-  /* ---------------- Seeded RNG ---------------- */
-  function hashSeed(str){
-    let h = 1779033703 ^ str.length;
-    for(let i=0;i<str.length;i++){
-      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
-      h = (h << 13) | (h >>> 19);
-    }
-    return function(){
-      h = Math.imul(h ^ (h >>> 16), 2246822507);
-      h = Math.imul(h ^ (h >>> 13), 3266489909);
-      h ^= h >>> 16;
-      return (h >>> 0) / 4294967296;
-    };
-  }
-  let GLOBAL_SEED = "n2m-2026-08-15";
 
   /* ---------------- Data ---------------- */
-  const CATEGORY_POOL = [
-    {cat:"AI Commoditization", tags:["Product","Strategy","SaaS"], title:"AI feature parity is collapsing SaaS pricing power",
-     desc:"Competing products ship near-identical AI features within weeks, so buyers stop paying a premium for “AI-powered” and switch on price alone.",
-     tam:420, sol:"A workflow-depth layer (not a feature) that locks in switching cost — proprietary data, integrations and outcomes tracking a generic AI wrapper can't copy overnight."},
-    {cat:"Compliance Overload", tags:["Compliance","Legal","Ops"], title:"New AI & data regulation is burying SMBs in compliance work",
-     desc:"Owners without legal teams can't keep pace with fast-moving AI, privacy and data-residency rules, and are stalling adoption out of fear of penalties.",
-     tam:180, sol:"A managed compliance-as-a-service layer: templated policies, audit trails and plain-language guidance sized for teams under 200 people."},
-    {cat:"Talent Mismatch", tags:["HR","Hiring","Ops"], title:"Skilled-labor shortages are stalling SMB growth plans",
-     desc:"Demand for technical and trade skills is outpacing local supply, forcing owners to slow expansion or overpay for scarce talent.",
-     tam:260, sol:"A vetted, on-demand talent marketplace paired with short applied-skills certification, priced below traditional staffing agencies."},
-    {cat:"Payment Friction", tags:["Finance","Sales","Payments"], title:"Cross-border payment friction is blocking SMB export growth",
-     desc:"FX spreads, settlement delays and compliance checks make it hard for small exporters to get paid quickly and predictably.",
-     tam:310, sol:"A multi-currency settlement product with transparent FX and same-week payout, undercutting bank wire costs for SMB exporters."},
-    {cat:"Customer Support Cost", tags:["Support","CX","Ops"], title:"Support costs are outpacing revenue as expectations rise",
-     desc:"Customers now expect instant, multi-channel support, but headcount costs scale faster than revenue for lean teams.",
-     tam:150, sol:"A support co-pilot trained on the business's own history that resolves the routine 70% and hands off the rest with full context."},
-    {cat:"Supply Chain Visibility", tags:["Supply Chain","Ops","Risk"], title:"SMBs lack real-time visibility into supplier risk",
-     desc:"Small operators find out about delays and shortages only after they hit revenue, with no early-warning signal from suppliers.",
-     tam:220, sol:"A lightweight supplier-risk monitor that flags delay signals from public shipping, customs and news data before they hit the business."},
-    {cat:"Energy Cost Volatility", tags:["Finance","Ops","Sustainability"], title:"Volatile energy costs are squeezing thin-margin operators",
-     desc:"Unpredictable energy pricing erodes margins for physical-goods and hospitality businesses that can't easily pass costs to customers.",
-     tam:140, sol:"A usage-and-tariff optimization tool that recommends load-shifting and contract timing to cut energy spend without capex."},
-    {cat:"Digital Trust", tags:["Trust & Safety","Security","CX"], title:"Rising fraud and deepfake risk is eroding digital trust",
-     desc:"Synthetic identity and deepfake fraud are increasing chargeback and reputational risk faster than SMB fraud tooling can adapt.",
-     tam:200, sol:"A lightweight identity-verification and anomaly layer sized for SMB checkout and onboarding flows, priced per verification."},
-    {cat:"Localization Gap", tags:["Marketing","Sales","Product"], title:"Global platforms underserve local language & regulatory nuance",
-     desc:"Owners expanding into new markets find major platforms don't handle local language, tax or compliance nuance well enough to trust.",
-     tam:95, sol:"A localization layer that plugs into existing platforms to handle local language, tax rules and payment norms per market."},
-    {cat:"Retention Crisis", tags:["HR","Ops","Retention"], title:"Employee retention costs are eating into SMB profitability",
-     desc:"Replacing skilled staff now costs 6-9 months of salary in lost productivity and hiring — small teams feel this hardest.",
-     tam:130, sol:"A retention-signal tool that flags flight-risk earlier from engagement and workload data, paired with lightweight manager playbooks."},
-    {cat:"Pipeline Stagnation", tags:["Sales","Marketing","Growth"], title:"Outbound sales pipelines are drying up as buyers self-serve research",
-     desc:"Buyers now do most of their research before ever talking to sales, so cold outbound conversion keeps falling while CAC keeps rising.",
-     tam:275, sol:"An intent-signal layer that surfaces which accounts are actively researching the problem right now, so outreach lands at the right moment."},
-    {cat:"Demand Gen Attribution", tags:["Marketing","Analytics","Growth"], title:"Marketing can't prove which campaigns actually drive revenue",
-     desc:"Fragmented tracking across channels leaves marketers unable to tie spend to pipeline, so budget keeps getting cut in downturns.",
-     tam:165, sol:"A lightweight, privacy-safe attribution layer that ties campaign touches to closed revenue without needing a full data-warehouse build."}
-  ];
-
-  // code, name, region, lat, lon, approx GDP (US$B, rounded, for demo SAM estimation only)
+  // code, name, region, lat, lon — no hardcoded economics. Real stats come from World Bank at runtime.
   const COUNTRIES = [
-    ["US","United States","North America",39.8,-98.5,27700],
-    ["CA","Canada","North America",56.1,-106.3,2200],
-    ["MX","Mexico","North America",23.6,-102.5,1800],
-    ["GB","United Kingdom","Europe",55.0,-3.0,3300],
-    ["IE","Ireland","Europe",53.4,-8.2,550],
-    ["FR","France","Europe",46.6,2.2,3000],
-    ["DE","Germany","Europe",51.2,10.4,4500],
-    ["NL","Netherlands","Europe",52.1,5.3,1100],
-    ["BE","Belgium","Europe",50.5,4.5,650],
-    ["ES","Spain","Europe",40.0,-3.7,1600],
-    ["PT","Portugal","Europe",39.4,-8.2,280],
-    ["IT","Italy","Europe",42.8,12.6,2200],
-    ["CH","Switzerland","Europe",46.8,8.2,900],
-    ["AT","Austria","Europe",47.5,14.6,500],
-    ["PL","Poland","Europe",51.9,19.1,800],
-    ["SE","Sweden","Europe",60.1,18.6,600],
-    ["NO","Norway","Europe",60.5,8.5,500],
-    ["DK","Denmark","Europe",56.3,9.5,400],
-    ["FI","Finland","Europe",61.9,25.7,300],
-    ["CZ","Czechia","Europe",49.8,15.5,330],
-    ["RO","Romania","Europe",45.9,24.9,350],
-    ["GR","Greece","Europe",39.1,21.8,240],
-    ["HU","Hungary","Europe",47.2,19.5,220],
-    ["BR","Brazil","South America",-14.2,-51.9,2200],
-    ["AR","Argentina","South America",-38.4,-63.6,640],
-    ["KR","South Korea","Asia",35.9,127.8,1800],
-    ["SG","Singapore","Asia",1.35,103.8,500],
-    ["MY","Malaysia","Asia",4.2,101.9,430],
-    ["ID","Indonesia","Asia",-0.8,113.9,1400],
-    ["AE","UAE","Middle East",23.4,53.8,500],
-    ["OM","Oman","Middle East",21.5,55.9,110],
-    ["SA","Saudi Arabia","Middle East",23.9,45.1,1100],
-    ["IR","Iran","Middle East",32.4,53.7,400],
-    ["IQ","Iraq","Middle East",33.2,43.7,250],
-    ["SY","Syria","Middle East",34.8,38.9,20],
-    ["TR","Turkey","Middle East",38.9,35.2,1100],
-    ["AM","Armenia","Middle East",40.1,45.0,25],
-    ["AZ","Azerbaijan","Middle East",40.1,47.6,75],
-    ["ZA","South Africa","Africa",-30.6,22.9,400],
-    ["MA","Morocco","Africa",31.8,-7.1,145],
-    ["EG","Egypt","Africa",26.8,30.8,380]
+    ["US","United States","North America",39.8,-98.5],
+    ["CA","Canada","North America",56.1,-106.3],
+    ["MX","Mexico","North America",23.6,-102.5],
+    ["GB","United Kingdom","Europe",55.0,-3.0],
+    ["IE","Ireland","Europe",53.4,-8.2],
+    ["FR","France","Europe",46.6,2.2],
+    ["DE","Germany","Europe",51.2,10.4],
+    ["NL","Netherlands","Europe",52.1,5.3],
+    ["BE","Belgium","Europe",50.5,4.5],
+    ["ES","Spain","Europe",40.0,-3.7],
+    ["PT","Portugal","Europe",39.4,-8.2],
+    ["IT","Italy","Europe",42.8,12.6],
+    ["CH","Switzerland","Europe",46.8,8.2],
+    ["AT","Austria","Europe",47.5,14.6],
+    ["PL","Poland","Europe",51.9,19.1],
+    ["SE","Sweden","Europe",60.1,18.6],
+    ["NO","Norway","Europe",60.5,8.5],
+    ["DK","Denmark","Europe",56.3,9.5],
+    ["FI","Finland","Europe",61.9,25.7],
+    ["CZ","Czechia","Europe",49.8,15.5],
+    ["RO","Romania","Europe",45.9,24.9],
+    ["GR","Greece","Europe",39.1,21.8],
+    ["HU","Hungary","Europe",47.2,19.5],
+    ["BR","Brazil","South America",-14.2,-51.9],
+    ["AR","Argentina","South America",-38.4,-63.6],
+    ["KR","South Korea","Asia",35.9,127.8],
+    ["SG","Singapore","Asia",1.35,103.8],
+    ["MY","Malaysia","Asia",4.2,101.9],
+    ["ID","Indonesia","Asia",-0.8,113.9],
+    ["AE","UAE","Middle East",23.4,53.8],
+    ["OM","Oman","Middle East",21.5,55.9],
+    ["SA","Saudi Arabia","Middle East",23.9,45.1],
+    ["IR","Iran","Middle East",32.4,53.7],
+    ["IQ","Iraq","Middle East",33.2,43.7],
+    ["SY","Syria","Middle East",34.8,38.9],
+    ["TR","Turkey","Middle East",38.9,35.2],
+    ["AM","Armenia","Middle East",40.1,45.0],
+    ["AZ","Azerbaijan","Middle East",40.1,47.6],
+    ["ZA","South Africa","Africa",-30.6,22.9],
+    ["MA","Morocco","Africa",31.8,-7.1],
+    ["EG","Egypt","Africa",26.8,30.8]
   ];
-  const WORLD_GDP = 105000;
-
-  let DATA = []; // built by buildDataset()
 
   function grade(score){
     if(score>=85) return "A";
@@ -667,41 +621,96 @@
     return {cls:"no", label:"Not recommended yet"};
   }
   function fmtUSD(n){
+    if(n==null || isNaN(n)) return "—";
     if(n>=1000) return "$"+(n/1000).toFixed(1)+"T";
-    return "$"+n.toFixed(0)+"B";
+    if(n<1) return "$"+Math.round(n*1000)+"M";
+    return "$"+n.toFixed(1).replace(/\.0$/,'')+"B";
+  }
+  function fmtNum(n){
+    if(n==null || isNaN(n)) return "—";
+    return Math.round(n).toLocaleString();
   }
 
-  function buildDataset(seed){
-    const items = [];
-    COUNTRIES.forEach((c)=>{
-      const [code,name,region,lat,lon,gdp] = c;
-      const incomeTier = gdp>2000?"High":gdp>600?"Upper-Mid":gdp>200?"Mid":"Emerging";
-      const urbanTier = gdp>1500?"70-90% urban":gdp>400?"55-75% urban":"35-60% urban";
-      CATEGORY_POOL.forEach((tpl, ci)=>{
-        const rnd = hashSeed(seed+"-"+code+"-"+ci);
-        const demand = 1 + rnd()*4;
-        const feasibility = 1 + rnd()*4;
-        const gtmEase = 1 + rnd()*4;
-        const whiteSpace = 1 + rnd()*4; // inverse of competition
-        const founderFit = 1 + rnd()*4;
-        const raw = (demand*1.2 + feasibility + gtmEase + whiteSpace + founderFit*0.8) / (1.2+1+1+1+0.8) / 5 * 100;
-        const score = Math.round(Math.min(99, Math.max(18, raw)));
-        const g = grade(score);
-        const sam = Math.max(1, Math.round(tpl.tam * (gdp/WORLD_GDP) * (0.35 + rnd()*0.4)));
-        items.push({
-          id: code+"-"+ci,
-          code, country:name, region, lat, lon,
-          category: tpl.cat, tags: tpl.tags, title: tpl.title, desc: tpl.desc, solution: tpl.sol,
-          tam: tpl.tam, sam,
-          demand, feasibility, gtmEase, whiteSpace, founderFit,
-          score, grade:g,
-          persona: incomeTier==="High"?"Ops / growth lead at an SMB or mid-market company":"Owner-operator running a lean team",
-          ageRange: "32–48",
-          incomeTier, urbanTier
+  /* ---------------- Real data: World Bank Open Data API (live, no key needed) ---------------- */
+  const WB_INDICATORS = {
+    gdp: "NY.GDP.MKTP.CD",
+    population: "SP.POP.TOTL",
+    urbanPct: "SP.URB.TOTL.IN.ZS",
+    gdpPerCapita: "NY.GDP.PCAP.CD"
+  };
+  let COUNTRY_STATS = {}; // code -> { gdp, population, urbanPct, gdpPerCapita } — real World Bank figures
+  let worldBankLoaded = false;
+
+  async function fetchWorldBankStats(){
+    const codes = COUNTRIES.map(c=>c[0]).join(';');
+    const stats = {};
+    await Promise.all(Object.entries(WB_INDICATORS).map(async ([key, indicator])=>{
+      try{
+        const res = await fetch(`https://api.worldbank.org/v2/country/${codes}/indicator/${indicator}?format=json&per_page=300&mrv=1`);
+        const raw = await res.text();
+        const json = JSON.parse(raw.replace(/^﻿/,''));
+        const rows = (json && json[1]) || [];
+        rows.forEach(row=>{
+          if(row.value==null) return;
+          const code = row.country.id;
+          if(!stats[code]) stats[code] = {};
+          stats[code][key] = row.value;
         });
-      });
+      }catch(e){ /* leave that indicator missing for affected countries */ }
+    }));
+    COUNTRY_STATS = stats;
+    worldBankLoaded = true;
+  }
+
+  /* ---------------- Real data: live AI diagnosis per country via the Cloudflare Worker ---------------- */
+  let DIAGNOSED = {};   // code -> sorted array of real, AI-generated problem items
+  let diagnosing = new Set(); // codes currently in-flight
+
+  function scoreFromFactors(f){
+    const raw = (f.demand*1.2 + f.feasibility + f.gtm_ease + f.white_space + f.founder_fit*0.8) / (1.2+1+1+1+0.8) / 5 * 100;
+    return Math.round(Math.min(99, Math.max(10, raw)));
+  }
+  function incomeTierFor(gdpPerCapita){
+    if(gdpPerCapita==null) return "Unknown";
+    if(gdpPerCapita>40000) return "High";
+    if(gdpPerCapita>15000) return "Upper-Mid";
+    if(gdpPerCapita>5000) return "Mid";
+    return "Emerging";
+  }
+
+  async function diagnoseCountry(code, force){
+    if(!force && DIAGNOSED[code]) return DIAGNOSED[code];
+    if(!CONFIG.WORKER_URL) throw new Error("CONFIG.WORKER_URL is not set — deploy the worker and set it in index.html");
+    const c = COUNTRIES.find(x=>x[0]===code);
+    const [ , name, region, lat, lon ] = c;
+    const res = await fetch(CONFIG.WORKER_URL+"/problems", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ country:name, region })
     });
-    return items.sort((a,b)=>b.score-a.score);
+    if(!res.ok) throw new Error("diagnose failed: HTTP "+res.status);
+    const json = await res.json();
+    const stats = COUNTRY_STATS[code] || {};
+    const items = (json.problems||[]).map((p, i)=>{
+      const score = scoreFromFactors(p);
+      return {
+        id: code+"-"+i, code, country:name, region, lat, lon,
+        category: p.category, tags: p.tags||[], title: p.title, desc: p.desc, solution: p.solution,
+        tam: p.tam_billion_usd, sam: p.sam_billion_usd,
+        demand: p.demand, feasibility: p.feasibility, gtmEase: p.gtm_ease, whiteSpace: p.white_space, founderFit: p.founder_fit,
+        score, grade: grade(score),
+        persona: p.persona, ageRange: p.age_range,
+        incomeTier: incomeTierFor(stats.gdpPerCapita),
+        urbanPct: stats.urbanPct, population: stats.population, gdp: stats.gdp, gdpPerCapita: stats.gdpPerCapita
+      };
+    });
+    items.sort((a,b)=>b.score-a.score);
+    DIAGNOSED[code] = items;
+    return items;
+  }
+
+  function allDiagnosedItems(){
+    return Object.values(DIAGNOSED).flat();
   }
 
   /* ---------------- Render: Map (real country shapes) ---------------- */
@@ -728,15 +737,9 @@
     bgRendered = true;
   }
   /* Top (highest-score) problem per country — represents that market's headline opportunity */
-  function countrySummary(){
-    const map = {};
-    DATA.forEach(it=>{
-      if(!map[it.code] || it.score > map[it.code].score) map[it.code] = it;
-    });
-    return map;
-  }
-  function countryProblemCount(code){
-    return DATA.reduce((n,it)=> it.code===code ? n+1 : n, 0);
+  function countryTop(code){
+    const items = DIAGNOSED[code];
+    return items && items.length ? items[0] : null;
   }
   function renderMap(){
     renderMapBackground();
@@ -745,20 +748,18 @@
     const tracked = (window.WORLD_MAP_DATA && window.WORLD_MAP_DATA.tracked) || {};
     const tip = document.getElementById('mapTooltip');
     const card = document.querySelector('.map-card');
-    const summary = countrySummary();
     COUNTRIES.forEach(c=>{
-      const code = c[0];
-      const top = summary[code];
-      if(!top) return;
+      const code = c[0], name = c[1];
       const iso = code.toLowerCase();
       const ds = tracked[iso];
       if(!ds || !ds.length) return;
-      const count = countryProblemCount(code);
+      const top = countryTop(code);
+      const isLoading = diagnosing.has(code);
       const g = document.createElementNS(SVG_NS,'g');
-      g.setAttribute('class', 'country grade-'+top.grade);
+      g.setAttribute('class', 'country '+(isLoading?'loading':(top?'grade-'+top.grade:'grade-pending')));
       g.setAttribute('tabindex','0');
       g.setAttribute('role','button');
-      g.setAttribute('aria-label', top.country+': '+count+' trend problems, top grade '+top.grade);
+      g.setAttribute('aria-label', top ? (name+': '+DIAGNOSED[code].length+' trend problems, top grade '+top.grade) : (name+': not yet diagnosed, click to run live AI diagnosis'));
       g.dataset.code = code;
       appendFragments(g, ds);
       g.addEventListener('click', ()=>openCountryList(code));
@@ -767,7 +768,7 @@
         const rect = card.getBoundingClientRect();
         tip.style.left = (e.clientX-rect.left)+'px';
         tip.style.top = (e.clientY-rect.top)+'px';
-        tip.textContent = top.country+' · '+count+' problems · Top grade '+top.grade;
+        tip.textContent = isLoading ? name+' · diagnosing…' : top ? (name+' · '+DIAGNOSED[code].length+' problems · Top grade '+top.grade) : (name+' · click to diagnose live');
         tip.classList.add('show');
       });
       g.addEventListener('mouseleave', ()=> tip.classList.remove('show'));
@@ -777,32 +778,40 @@
 
   /* ---------------- Render: Region list ---------------- */
   function renderRegionPanel(){
-    const summary = countrySummary();
     const regions = {};
     COUNTRIES.forEach(c=>{
       const [code,name,region] = c;
-      const top = summary[code];
-      if(!top) return;
-      (regions[region] = regions[region]||[]).push(top);
+      (regions[region] = regions[region]||[]).push({code, name});
     });
     const order = ["North America","Europe","South America","Asia","Middle East","Africa"];
     const panel = document.getElementById('regionPanel');
     panel.innerHTML = "";
     order.forEach((r,i)=>{
-      const list = (regions[r]||[]).sort((a,b)=>b.score-a.score);
+      const list = (regions[r]||[]).slice().sort((a,b)=>{
+        const ta = countryTop(a.code), tb = countryTop(b.code);
+        if(ta && tb) return tb.score-ta.score;
+        if(ta) return -1;
+        if(tb) return 1;
+        return a.name.localeCompare(b.name);
+      });
       const details = document.createElement('details');
       details.className = "region-list";
       if(i===0) details.open = true;
       const summaryEl = document.createElement('summary');
       summaryEl.innerHTML = `<span>${r}</span><span class="count">${list.length} markets</span>`;
       details.appendChild(summaryEl);
-      list.forEach(it=>{
+      list.forEach(({code, name})=>{
+        const top = countryTop(code);
+        const isLoading = diagnosing.has(code);
         const row = document.createElement('div');
         row.className = "region-country";
         row.tabIndex = 0;
-        row.innerHTML = `<span class="name">${it.country}</span><span class="grade-badge grade-${it.grade}">${it.grade} · ${it.score}</span>`;
-        row.addEventListener('click', ()=>openCountryList(it.code));
-        row.addEventListener('keydown', e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openCountryList(it.code);} });
+        const badge = isLoading ? `<span class="grade-badge grade-pending">diagnosing…</span>`
+          : top ? `<span class="grade-badge grade-${top.grade}">${top.grade} · ${top.score}</span>`
+          : `<span class="grade-badge grade-pending">click to diagnose</span>`;
+        row.innerHTML = `<span class="name">${name}</span>${badge}`;
+        row.addEventListener('click', ()=>openCountryList(code));
+        row.addEventListener('keydown', e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openCountryList(code);} });
         details.appendChild(row);
       });
       panel.appendChild(details);
@@ -815,7 +824,7 @@
 
   function allTags(){
     const set = new Set();
-    CATEGORY_POOL.forEach(tpl=> tpl.tags.forEach(t=>set.add(t)));
+    allDiagnosedItems().forEach(it=> (it.tags||[]).forEach(t=>set.add(t)));
     return [...set].sort();
   }
   function populateFilterControls(){
@@ -828,8 +837,9 @@
       sel.appendChild(opt);
     });
     const tagWrap = document.getElementById('tagFilters');
-    if(tagWrap.children.length) return;
+    const existingTags = new Set([...tagWrap.children].map(el=>el.textContent));
     allTags().forEach(tag=>{
+      if(existingTags.has(tag)) return;
       const chip = document.createElement('button');
       chip.type = "button";
       chip.className = "tag-chip";
@@ -855,7 +865,8 @@
   }
   function renderRankings(){
     const body = document.getElementById('rankBody');
-    const rows = applyFilters(DATA);
+    const all = allDiagnosedItems();
+    const rows = applyFilters(all);
     const key = sortState.key;
     rows.sort((a,b)=>{
       let av,bv;
@@ -870,22 +881,29 @@
       return (av-bv) * sortState.dir * -1;
     });
     body.innerHTML = "";
-    rows.forEach((it, idx)=>{
+    if(!all.length){
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><span class="rank-pos">${idx+1}</span></td>
-        <td>${it.country}</td>
-        <td>${it.title}</td>
-        <td class="num">${it.category}</td>
-        <td><div class="tag-row">${it.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></td>
-        <td class="num">${it.score}</td>
-        <td><span class="grade-badge grade-${it.grade}">${it.grade}</span></td>
-        <td class="num">${fmtUSD(it.tam)}</td>
-      `;
-      tr.addEventListener('click', ()=>openDrawer(it.id));
+      tr.innerHTML = `<td colspan="8" style="padding:32px 16px;text-align:center;color:var(--text-faint);">No markets diagnosed yet. Click a country on the World Map tab, or hit "Diagnose All Markets" below to run live AI diagnosis on everything.</td>`;
       body.appendChild(tr);
-    });
-    document.getElementById('rankResultCount').textContent = rows.length+" of "+DATA.length+" problems";
+    } else {
+      rows.forEach((it, idx)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="rank-pos">${idx+1}</span></td>
+          <td>${it.country}</td>
+          <td>${it.title}</td>
+          <td class="num">${it.category}</td>
+          <td><div class="tag-row">${it.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></td>
+          <td class="num">${it.score}</td>
+          <td><span class="grade-badge grade-${it.grade}">${it.grade}</span></td>
+          <td class="num">${fmtUSD(it.tam)}</td>
+        `;
+        tr.addEventListener('click', ()=>openDrawer(it.id, it.code));
+        body.appendChild(tr);
+      });
+    }
+    const diagnosedCount = Object.keys(DIAGNOSED).length;
+    document.getElementById('rankResultCount').textContent = rows.length+" of "+all.length+" problems · "+diagnosedCount+" of "+COUNTRIES.length+" markets diagnosed live";
   }
   document.querySelectorAll('#rankTable thead th[data-sort]').forEach(th=>{
     th.addEventListener('click', ()=>{
@@ -904,6 +922,37 @@
     renderRankings();
   });
 
+  /* Diagnose every undiagnosed market, limited concurrency so we don't hammer the API */
+  async function diagnoseAll(){
+    const btn = document.getElementById('diagnoseAllBtn');
+    const todo = COUNTRIES.map(c=>c[0]).filter(code=>!DIAGNOSED[code] && !diagnosing.has(code));
+    if(!todo.length) return;
+    btn.disabled = true;
+    let done = 0;
+    const total = todo.length;
+    const updateProgress = ()=>{ btn.textContent = `Diagnosing… ${done}/${total}`; };
+    updateProgress();
+    const concurrency = 4;
+    let idx = 0;
+    async function worker(){
+      while(idx < todo.length){
+        const code = todo[idx++];
+        diagnosing.add(code);
+        renderMap(); renderRegionPanel();
+        try{ await diagnoseCountry(code); }catch(e){ /* leave undiagnosed, user can retry via map click */ }
+        diagnosing.delete(code);
+        done++;
+        updateProgress();
+        renderMap(); renderRegionPanel(); renderRankings(); populateFilterControls();
+      }
+    }
+    await Promise.all(Array.from({length:concurrency}, worker));
+    btn.textContent = "Diagnose All Markets";
+    btn.disabled = false;
+    stamp();
+  }
+  document.getElementById('diagnoseAllBtn').addEventListener('click', diagnoseAll);
+
   /* ---------------- Drawer ---------------- */
   const overlay = document.getElementById('drawerOverlay');
   const drawer = document.getElementById('drawer');
@@ -918,15 +967,45 @@
     document.getElementById('drawerClose').focus();
   }
 
-  function openCountryList(code){
-    const items = DATA.filter(d=>d.code===code).sort((a,b)=>b.score-a.score);
-    if(!items.length) return;
-    const country = items[0].country, region = items[0].region;
+  async function openCountryList(code){
+    const c = COUNTRIES.find(x=>x[0]===code);
+    const name = c[1], region = c[2];
     document.querySelectorAll('.country').forEach(p=>p.classList.toggle('active', p.dataset.code===code));
+
+    if(!DIAGNOSED[code]){
+      drawerContent.innerHTML = `
+        <div class="drawer-eyebrow">${region} · ${name}</div>
+        <h2>Diagnosing live…</h2>
+        <div class="sub">Calling OpenAI through the N2M worker to diagnose real, current trend problems for ${name}. Takes a few seconds.</div>
+        <div class="loading-spinner" aria-hidden="true"></div>
+      `;
+      lastFocused = document.activeElement;
+      openDrawerBase();
+      diagnosing.add(code);
+      renderMap(); renderRegionPanel();
+      try{
+        await diagnoseCountry(code);
+      }catch(err){
+        diagnosing.delete(code);
+        renderMap(); renderRegionPanel();
+        drawerContent.innerHTML = `
+          <div class="drawer-eyebrow">${region} · ${name}</div>
+          <h2>Diagnosis failed</h2>
+          <div class="sub">${(err && err.message) || "Couldn't reach the worker."} Check that the worker is deployed and CONFIG.WORKER_URL is correct.</div>
+          <button class="gen-btn" id="retryDiagnose">Retry</button>
+        `;
+        document.getElementById('retryDiagnose').addEventListener('click', ()=>openCountryList(code));
+        return;
+      }
+      diagnosing.delete(code);
+      renderMap(); renderRegionPanel(); renderRankings(); populateFilterControls(); stamp();
+    }
+
+    const items = DIAGNOSED[code];
     drawerContent.innerHTML = `
-      <div class="drawer-eyebrow">${region} · ${country}</div>
+      <div class="drawer-eyebrow">${region} · ${name}</div>
       <h2>${items.length} trend problems</h2>
-      <div class="sub">Ranked by priority score for this market. Click one to open its full brief.</div>
+      <div class="sub">Live AI diagnosis, ranked by priority score. Click one to open its full brief.</div>
       <div class="problem-list">
         ${items.map(it=>`
           <button class="problem-row" data-id="${it.id}">
@@ -947,7 +1026,7 @@
   }
 
   function openDrawer(id, fromCode){
-    const it = DATA.find(d=>d.id===id);
+    const it = (DIAGNOSED[fromCode]||[]).find(d=>d.id===id);
     if(!it) return;
     document.querySelectorAll('.country').forEach(p=>p.classList.toggle('active', p.dataset.code===it.code));
     const rec = recommendation(it.grade);
@@ -990,8 +1069,11 @@
           <div><div class="k">Primary buyer</div>${it.persona}</div>
           <div><div class="k">Age range</div>${it.ageRange}</div>
           <div><div class="k">Income tier</div>${it.incomeTier}</div>
-          <div><div class="k">Urbanization</div>${it.urbanTier}</div>
+          <div><div class="k">Urbanization</div>${it.urbanPct!=null ? Math.round(it.urbanPct)+"% urban" : "—"}</div>
+          <div><div class="k">Population</div>${fmtNum(it.population)}</div>
+          <div><div class="k">GDP / capita</div>${it.gdpPerCapita!=null ? "$"+fmtNum(it.gdpPerCapita) : "—"}</div>
         </div>
+        <div class="data-source-note">Population, urbanization & GDP figures are live from the World Bank Open Data API.</div>
       </section>
 
       <section>
@@ -1067,29 +1149,35 @@
   function stamp(){
     const now = new Date();
     document.getElementById('lastUpdated').textContent = now.toLocaleString(undefined, {dateStyle:"medium", timeStyle:"short"});
+    document.getElementById('problemCount').textContent = Object.keys(DIAGNOSED).length;
   }
-  function fullRender(){
-    DATA = buildDataset(GLOBAL_SEED);
+  async function initialLoad(){
     document.getElementById('countryCount').textContent = COUNTRIES.length;
-    document.getElementById('problemCount').textContent = DATA.length;
-    populateFilterControls();
     renderMap();
     renderRegionPanel();
     renderRankings();
+    populateFilterControls();
+    stamp();
+    await fetchWorldBankStats(); // real, live World Bank data — independent of any country diagnosis
     stamp();
   }
-  document.getElementById('refreshBtn').addEventListener('click', function(){
+  document.getElementById('refreshBtn').addEventListener('click', async function(){
     this.classList.add('spinning');
     this.disabled = true;
-    GLOBAL_SEED = "n2m-"+Date.now();
-    setTimeout(()=>{
-      fullRender();
-      this.classList.remove('spinning');
-      this.disabled = false;
-    }, 550);
+    await fetchWorldBankStats();
+    const codes = Object.keys(DIAGNOSED);
+    for(const code of codes){
+      diagnosing.add(code);
+      renderMap(); renderRegionPanel();
+      try{ await diagnoseCountry(code, true); }catch(e){ /* keep prior data for this market if a re-diagnose fails */ }
+      diagnosing.delete(code);
+    }
+    renderMap(); renderRegionPanel(); renderRankings(); populateFilterControls(); stamp();
+    this.classList.remove('spinning');
+    this.disabled = false;
   });
 
-  fullRender();
+  initialLoad();
 })();
 </script>
 </body>
