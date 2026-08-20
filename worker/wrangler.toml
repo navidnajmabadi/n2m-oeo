@@ -6,3 +6,7 @@ compatibility_date = "2024-11-01"
 # Set to your GitHub Pages URL after you know it, e.g. https://navidnajmabadi.github.io
 [vars]
 ALLOWED_ORIGIN = "https://navidnajmabadi.github.io"
+
+[[kv_namespaces]]
+binding = "OEO_CACHE"
+id = "a0c98e33741848918009eafaa37136ec"
