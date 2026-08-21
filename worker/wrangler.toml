@@ -10,3 +10,9 @@ ALLOWED_ORIGIN = "https://navidnajmabadi.github.io"
 [[kv_namespaces]]
 binding = "OEO_CACHE"
 id = "a0c98e33741848918009eafaa37136ec"
+
+# Daily weekday refresh of real Google Trends interest scores (via SerpApi) for the
+# THEME_POOL, both countries — 10 SerpApi calls/day, well within the free 250/month tier.
+# 13:00 UTC = 8/9am Eastern, Mon-Fri.
+[triggers]
+crons = ["0 13 * * 1-5"]
