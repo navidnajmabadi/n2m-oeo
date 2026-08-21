@@ -99,6 +99,14 @@
   nav.tabs button:hover{color:var(--text);}
   nav.tabs button.active{background:var(--red);color:#fff;box-shadow:0 0 22px var(--red-glow);}
   nav.tabs button:focus-visible{outline:2px solid var(--red-bright);outline-offset:2px;}
+  .blueprint-link{
+    appearance:none;border:none;background:transparent;color:var(--text-dim);text-decoration:none;
+    font-family:var(--font-display);font-weight:600;font-size:13.5px;letter-spacing:0.01em;
+    padding:9px 18px;border-radius:999px;transition:color .2s ease, background .2s ease;
+    white-space:nowrap;display:inline-flex;align-items:center;
+  }
+  .blueprint-link:hover{color:var(--text);background:rgba(255,255,255,0.06);}
+  .blueprint-link:focus-visible{outline:2px solid var(--red-bright);outline-offset:2px;}
 
   .refresh-btn{
     display:flex;align-items:center;gap:8px;
@@ -201,14 +209,20 @@
     position:fixed;top:0;right:0;height:100dvh;width:min(480px,100%);
     background:var(--bg-elev);border-left:1px solid var(--panel-border);
     z-index:90;transform:translateX(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);
-    overflow-y:auto;padding:var(--space-5);
+    overflow-y:auto;display:flex;flex-direction:column;
   }
   .drawer.open{transform:translateX(0);}
-  .drawer-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;
+  .drawer-chrome{
+    position:sticky;top:0;z-index:2;flex-shrink:0;
+    display:flex;justify-content:flex-end;align-items:center;gap:8px;
+    padding:16px var(--space-5) 0;background:var(--bg-elev);
+  }
+  .drawer-close{width:36px;height:36px;border-radius:50%;flex-shrink:0;
     background:var(--panel);border:1px solid var(--panel-border);display:flex;align-items:center;justify-content:center;color:var(--text);}
   .drawer-close:hover{border-color:var(--red);}
+  #drawerContent{padding:10px var(--space-5) var(--space-5);}
   .drawer-eyebrow{font-family:var(--font-mono);font-size:11px;color:var(--red-bright);letter-spacing:.08em;text-transform:uppercase;}
-  .drawer h2{font-family:var(--font-display);font-size:22px;margin:8px 0 4px;padding-right:40px;}
+  .drawer h2{font-family:var(--font-display);font-size:22px;margin:8px 0 4px;}
   .drawer .sub{color:var(--text-dim);font-size:13.5px;margin-bottom:var(--space-4);}
   .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:var(--space-4);}
   .metric{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius-s);padding:12px;}
@@ -234,6 +248,11 @@
   .pr-title{font-size:13.5px;font-weight:500;margin-bottom:6px;}
   .pr-tags{display:flex;flex-wrap:wrap;gap:5px;}
   .problem-row .grade-badge{flex-shrink:0;}
+  .trend-badge{
+    flex-shrink:0;font-family:var(--font-mono);font-size:11px;font-weight:600;padding:2px 10px;border-radius:999px;
+    background:rgba(255,255,255,0.06);color:var(--text-dim);border:1px solid var(--panel-border);white-space:nowrap;
+  }
+  .general-row .pr-title{font-size:14px;line-height:1.4;margin-bottom:0;}
   .drawer section{margin-bottom:var(--space-4);}
   .drawer h3{font-family:var(--font-display);font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);margin-bottom:8px;}
   .drawer p{font-size:14px;color:var(--text);}
@@ -245,10 +264,82 @@
   .demo-grid div{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius-s);padding:10px;}
   .demo-grid .k{font-size:10.5px;color:var(--text-faint);font-family:var(--font-mono);text-transform:uppercase;}
   .data-source-note{font-size:11px;color:var(--text-faint);margin-top:8px;line-height:1.5;}
+  .section-label{font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+
+  .demographic-strip{display:flex;flex-wrap:wrap;border:1px solid var(--panel-border);border-radius:var(--radius-m);overflow:hidden;background:var(--panel);}
+  .demographic-strip .stat{flex:1 1 130px;padding:10px 14px;border-right:1px solid var(--panel-border);border-bottom:1px solid var(--panel-border);display:flex;align-items:center;gap:8px;}
+  .demographic-strip .stat svg{flex-shrink:0;color:var(--text-faint);}
+  .demographic-strip .stat .k{font-size:9px;color:var(--text-faint);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.03em;}
+  .demographic-strip .stat .v{font-size:13px;color:var(--text);margin-top:2px;font-weight:600;}
+
+  .assumption-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .assumption-grid label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-faint);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.03em;}
+  .assumption-grid input{
+    background:var(--bg-elev);border:1px solid var(--panel-border);border-radius:var(--radius-s);
+    color:var(--text);font-family:var(--font-body);font-size:14px;padding:8px 10px;min-height:38px;
+  }
+  .assumption-grid input:focus-visible{outline:2px solid var(--red-bright);outline-offset:1px;}
+  .eoy-row{
+    display:flex;justify-content:space-between;align-items:center;margin-top:10px;
+    background:rgba(228,71,42,0.06);border:1px solid rgba(228,71,42,0.25);border-radius:var(--radius-s);padding:12px 14px;
+  }
+  .eoy-row span{font-size:12.5px;color:var(--text-dim);}
+  .eoy-row b{font-family:var(--font-display);font-size:19px;color:var(--red-bright);}
   .loading-spinner{
     width:28px;height:28px;border-radius:50%;margin-top:20px;
     border:3px solid rgba(255,255,255,0.12);border-top-color:var(--red-bright);
     animation:spin .8s linear infinite;
+  }
+  .industry-tag{display:inline-flex;align-items:center;gap:5px;}
+  .industry-tag b{font-weight:700;text-transform:uppercase;font-size:9.5px;letter-spacing:.03em;}
+  .industry-tag.pri-high{border-color:rgba(239,59,59,0.4);color:var(--grade-a);background:rgba(239,59,59,0.1);}
+  .industry-tag.pri-high b{color:var(--grade-a);}
+  .industry-tag.pri-medium{border-color:rgba(242,135,43,0.4);color:var(--grade-b);background:rgba(242,135,43,0.08);}
+  .industry-tag.pri-medium b{color:var(--grade-b);}
+  .industry-tag.pri-low{border-color:var(--panel-border);color:var(--text-dim);background:rgba(255,255,255,0.04);}
+  .industry-tag.pri-low b{color:var(--text-faint);}
+
+  .competitor-list{display:flex;flex-direction:column;gap:8px;}
+  .competitor-row{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius-s);padding:10px 12px;font-size:13px;}
+  .competitor-row b{display:block;color:var(--text);margin-bottom:2px;}
+  .competitor-row span{color:var(--text-dim);font-size:12.5px;}
+  .proj-chart-wrap{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius-s);padding:12px;}
+  .proj-chart{width:100%;height:90px;display:block;}
+  .proj-labels{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);margin-top:6px;}
+
+  .print-btn{
+    display:flex;align-items:center;gap:6px;flex-shrink:0;
+    background:var(--panel);border:1px solid var(--panel-border);color:var(--text-dim);
+    font-family:var(--font-display);font-weight:600;font-size:11.5px;padding:8px 14px;border-radius:999px;
+    transition:border-color .15s,color .15s;min-height:36px;white-space:nowrap;
+  }
+  .print-btn:hover{border-color:var(--red);color:var(--text);}
+
+  /* Desktop: drawer becomes a full content page instead of a narrow sidebar */
+  @media(min-width:900px){
+    .drawer{width:100%;}
+    .drawer-chrome,#drawerContent{max-width:760px;margin-left:auto;margin-right:auto;width:100%;}
+    .drawer-chrome{padding-top:var(--space-6);}
+    #drawerContent{padding-bottom:var(--space-7);}
+  }
+
+  /* Print / Save-as-PDF: dark theme becomes light-on-white so text stays legible */
+  @media print{
+    body{background:#fff !important;color:#111 !important;}
+    #starfield,.bg-glow,header.topbar,.drawer-overlay,.drawer-chrome,
+    .map-layout,.side-panel,.rank-filters,.tag-filters,#view-model,#view-rankings,#view-map .page-head ~ *{display:none !important;}
+    .drawer{
+      position:static !important;transform:none !important;width:100% !important;height:auto !important;
+      background:#fff !important;color:#111 !important;overflow:visible !important;
+    }
+    .drawer.open{transform:none !important;}
+    #drawerContent{max-width:100% !important;padding:0 !important;}
+    .drawer-eyebrow{color:#B8860B !important;}
+    .drawer h2,.drawer h3,.drawer p,.drawer .sub{color:#111 !important;}
+    .metric,.demo-grid div,.competitor-row,.proj-chart-wrap,.problem-row{background:#f4f4f4 !important;border-color:#ccc !important;}
+    .metric .v,.metric .k,.tag,.data-source-note{color:#111 !important;}
+    .back-link,#briefSection{display:none !important;}
+    a[href]::after{content:"";}
   }
   textarea.brief-input{
     width:100%;min-height:70px;background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius-s);
@@ -394,6 +485,7 @@
       <button role="tab" aria-selected="true" class="active" data-view="map">World Map</button>
       <button role="tab" aria-selected="false" data-view="rankings">Rankings</button>
       <button role="tab" aria-selected="false" data-view="model">Business Model</button>
+      <a href="investment-pitch.html" class="blueprint-link" role="tab">Blueprint ↗</a>
     </nav>
     <button class="refresh-btn" id="refreshBtn" aria-label="Refresh trend data">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -408,12 +500,12 @@
   <section class="view active" id="view-map" role="tabpanel">
     <div class="page-head">
       <h1>Trend Problems — World Map</h1>
-      <p>Live AI diagnosis by market, generated on demand — click a country to run real diagnosis via OpenAI. Demographics are live from the World Bank.</p>
-      <div class="last-updated">Last update: <b id="lastUpdated">—</b> · <span id="countryCount">0</span> markets tracked · <span id="problemCount">0</span> diagnosed live</div>
+      <p>Live AI diagnosis for micro and small businesses, country by country, general theme down to specific problem. Click a country → general problems → specific problems via OpenAI. Cached, since real trends don't shift fast.</p>
+      <div class="last-updated">Last update: <b id="lastUpdated">—</b> · <span id="countryCount">0</span> countries tracked · <span id="problemCount">0</span> explored</div>
     </div>
     <div class="map-layout">
       <div class="map-card">
-        <svg class="world-svg" id="worldSvg" viewBox="-35.8 80 2776 1163.1" role="img" aria-label="World map — highlighted countries are tracked trend markets, click to open a brief">
+        <svg class="world-svg" id="worldSvg" viewBox="-35.8 80 2776 1163.1" role="img" aria-label="World map — highlighted countries are tracked trend markets, click to diagnose">
           <g id="bgLayer"></g>
           <g id="countryLayer"></g>
         </svg>
@@ -437,9 +529,8 @@
       <div class="last-updated">Weighted score = demand + feasibility + GTM ease + white-space − competition</div>
     </div>
     <div class="rank-filters">
-      <input type="text" class="rank-search" id="rankSearch" placeholder="Search problems, markets, categories, tags…" autocomplete="off">
-      <select class="rank-select" id="rankCountrySelect"><option value="">All markets</option></select>
-      <button class="refresh-btn" id="diagnoseAllBtn" style="flex-shrink:0;">Diagnose All Markets</button>
+      <input type="text" class="rank-search" id="rankSearch" placeholder="Search problems, states, industries, tags…" autocomplete="off">
+      <select class="rank-select" id="rankCountrySelect"><option value="">All countries</option></select>
       <span class="rank-result-count" id="rankResultCount"></span>
     </div>
     <div class="tag-filters" id="tagFilters"></div>
@@ -451,8 +542,7 @@
               <th data-sort="rank">#</th>
               <th data-sort="country">Market</th>
               <th data-sort="problem">Trend Problem</th>
-              <th data-sort="category">Category</th>
-              <th>Tags</th>
+              <th data-sort="category">Industries (priority)</th>
               <th data-sort="score">Score</th>
               <th data-sort="grade">Grade</th>
               <th data-sort="tam">TAM</th>
@@ -503,15 +593,20 @@
       <b style="color:var(--text);">This is live, not a mockup:</b> problems, scores, TAM/SAM and solutions on this site are generated on demand by OpenAI (via a Cloudflare Worker that holds the key server-side — never in this repo). Demographic figures are fetched live from the World Bank Open Data API. Nothing is pre-written; every market is diagnosed fresh the first time you open it.
     </div>
   </section>
-
 </main>
 
 <!-- ============ DETAIL DRAWER ============ -->
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <aside class="drawer" id="drawer" aria-hidden="true">
-  <button class="drawer-close" id="drawerClose" aria-label="Close">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
+  <div class="drawer-chrome">
+    <button class="print-btn" id="printBtn" title="Save as PDF">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>
+      <span>Save as PDF</span>
+    </button>
+    <button class="drawer-close" id="drawerClose" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
   <div id="drawerContent"></div>
 </aside>
 
@@ -520,9 +615,9 @@
   "use strict";
 
   /* =========================================================
-     CONFIG — no API key lives here. The brief generator calls a
-     Cloudflare Worker (see worker/) that holds the OpenAI key
-     server-side. Deploy the worker, then paste its URL below.
+     CONFIG — no API key lives here. Shares the same Cloudflare Worker
+     as N2M (n2m-brief-proxy) so it reuses the already-configured
+     OpenAI key — no separate secret setup needed for this site.
   ========================================================== */
   const CONFIG = {
     WORKER_URL: "https://n2m-brief-proxy.navid-najmabadi.workers.dev",
@@ -564,57 +659,70 @@
 
   /* ---------------- Data ---------------- */
   // code, name, region, lat, lon — no hardcoded economics. Real stats come from World Bank at runtime.
-  const COUNTRIES = [
-    ["US","United States","North America",39.8,-98.5],
-    ["CA","Canada","North America",56.1,-106.3],
-    ["MX","Mexico","North America",23.6,-102.5],
-    ["GB","United Kingdom","Europe",55.0,-3.0],
-    ["IE","Ireland","Europe",53.4,-8.2],
-    ["FR","France","Europe",46.6,2.2],
-    ["DE","Germany","Europe",51.2,10.4],
-    ["NL","Netherlands","Europe",52.1,5.3],
-    ["BE","Belgium","Europe",50.5,4.5],
-    ["ES","Spain","Europe",40.0,-3.7],
-    ["PT","Portugal","Europe",39.4,-8.2],
-    ["IT","Italy","Europe",42.8,12.6],
-    ["CH","Switzerland","Europe",46.8,8.2],
-    ["AT","Austria","Europe",47.5,14.6],
-    ["PL","Poland","Europe",51.9,19.1],
-    ["SE","Sweden","Europe",60.1,18.6],
-    ["NO","Norway","Europe",60.5,8.5],
-    ["DK","Denmark","Europe",56.3,9.5],
-    ["FI","Finland","Europe",61.9,25.7],
-    ["CZ","Czechia","Europe",49.8,15.5],
-    ["RO","Romania","Europe",45.9,24.9],
-    ["GR","Greece","Europe",39.1,21.8],
-    ["HU","Hungary","Europe",47.2,19.5],
-    ["BR","Brazil","South America",-14.2,-51.9],
-    ["AR","Argentina","South America",-38.4,-63.6],
-    ["KR","South Korea","Asia",35.9,127.8],
-    ["SG","Singapore","Asia",1.35,103.8],
-    ["MY","Malaysia","Asia",4.2,101.9],
-    ["ID","Indonesia","Asia",-0.8,113.9],
-    ["AE","UAE","Middle East",23.4,53.8],
-    ["OM","Oman","Middle East",21.5,55.9],
-    ["SA","Saudi Arabia","Middle East",23.9,45.1],
-    ["IR","Iran","Middle East",32.4,53.7],
-    ["IQ","Iraq","Middle East",33.2,43.7],
-    ["SY","Syria","Middle East",34.8,38.9],
-    ["TR","Turkey","Middle East",38.9,35.2],
-    ["AM","Armenia","Middle East",40.1,45.0],
-    ["AZ","Azerbaijan","Middle East",40.1,47.6],
-    ["ZA","South Africa","Africa",-30.6,22.9],
-    ["MA","Morocco","Africa",31.8,-7.1],
-    ["EG","Egypt","Africa",26.8,30.8]
+  // code (ISO2), name, region — the tracked N2M markets
+  const STATES = [
+    ["US","United States","North America"],
+    ["CA","Canada","North America"],
+    ["MX","Mexico","North America"],
+    ["GB","United Kingdom","Europe"],
+    ["IE","Ireland","Europe"],
+    ["FR","France","Europe"],
+    ["DE","Germany","Europe"],
+    ["NL","Netherlands","Europe"],
+    ["BE","Belgium","Europe"],
+    ["ES","Spain","Europe"],
+    ["PT","Portugal","Europe"],
+    ["IT","Italy","Europe"],
+    ["CH","Switzerland","Europe"],
+    ["AT","Austria","Europe"],
+    ["PL","Poland","Europe"],
+    ["SE","Sweden","Europe"],
+    ["NO","Norway","Europe"],
+    ["DK","Denmark","Europe"],
+    ["FI","Finland","Europe"],
+    ["CZ","Czechia","Europe"],
+    ["RO","Romania","Europe"],
+    ["GR","Greece","Europe"],
+    ["HU","Hungary","Europe"],
+    ["BR","Brazil","South America"],
+    ["AR","Argentina","South America"],
+    ["KR","South Korea","Asia"],
+    ["SG","Singapore","Asia"],
+    ["MY","Malaysia","Asia"],
+    ["ID","Indonesia","Asia"],
+    ["AE","UAE","Middle East"],
+    ["OM","Oman","Middle East"],
+    ["SA","Saudi Arabia","Middle East"],
+    ["IR","Iran","Middle East"],
+    ["IQ","Iraq","Middle East"],
+    ["SY","Syria","Middle East"],
+    ["TR","Turkey","Middle East"],
+    ["AM","Armenia","Middle East"],
+    ["AZ","Azerbaijan","Middle East"],
+    ["ZA","South Africa","Africa"],
+    ["MA","Morocco","Africa"],
+    ["EG","Egypt","Africa"]
+  ];
+
+  const INDUSTRIES = [
+    ["construction","Construction"],
+    ["manufacturing","Manufacturing & Industrial"],
+    ["retail","Retail"],
+    ["ecommerce","E-commerce & Online Shops"],
+    ["hospitality","Food, Beverage & Hospitality"],
+    ["professional","Professional Services"],
+    ["healthcare","Healthcare"],
+    ["logistics","Transportation & Logistics"]
   ];
 
   function grade(score){
-    if(score>=85) return "A";
-    if(score>=70) return "B";
-    if(score>=55) return "C";
+    if(score>=88) return "A";
+    if(score>=74) return "B";
+    if(score>=58) return "C";
     if(score>=40) return "D";
     return "F";
   }
+  function industryPriorityRank(p){ return p==="High"?3 : p==="Medium"?2 : 1; }
   function recommendation(g){
     if(g==="A"||g==="B") return {cls:"go", label:"Recommended — start Develop"};
     if(g==="C") return {cls:"maybe", label:"Borderline — validate before building"};
@@ -638,11 +746,11 @@
     urbanPct: "SP.URB.TOTL.IN.ZS",
     gdpPerCapita: "NY.GDP.PCAP.CD"
   };
-  let COUNTRY_STATS = {}; // code -> { gdp, population, urbanPct, gdpPerCapita } — real World Bank figures
+  let COUNTRY_STATS = {}; // ISO2 code -> { gdp, population, urbanPct, gdpPerCapita } — real World Bank figures
   let worldBankLoaded = false;
 
   async function fetchWorldBankStats(){
-    const codes = COUNTRIES.map(c=>c[0]).join(';');
+    const codes = STATES.map(s=>s[0]).join(';');
     const stats = {};
     await Promise.all(Object.entries(WB_INDICATORS).map(async ([key, indicator])=>{
       try{
@@ -656,15 +764,18 @@
           if(!stats[code]) stats[code] = {};
           stats[code][key] = row.value;
         });
-      }catch(e){ /* leave that indicator missing for affected countries */ }
+      }catch(e){ /* leave that indicator missing */ }
     }));
     COUNTRY_STATS = stats;
     worldBankLoaded = true;
   }
 
   /* ---------------- Real data: live AI diagnosis per country via the Cloudflare Worker ---------------- */
-  let DIAGNOSED = {};   // code -> sorted array of real, AI-generated problem items
-  let diagnosing = new Set(); // codes currently in-flight
+  let GENERAL = {};     // country name -> array of {theme, statement, trendScore}, real-Trends-ranked, not buildable/graded
+  let generalLoading = new Set(); // country names currently in-flight
+  let DIAGNOSED = {};   // "stateCode::theme" -> sorted array of specific, buildable problem items
+  let diagnosing = new Set(); // "stateCode::theme" keys currently in-flight
+  let detailCache = {}; // problem id -> problem-detail response (platform/competitors/pricing/projection)
 
   function scoreFromFactors(f){
     const raw = (f.demand*1.2 + f.feasibility + f.gtm_ease + f.white_space + f.founder_fit*0.8) / (1.2+1+1+1+0.8) / 5 * 100;
@@ -677,40 +788,89 @@
     if(gdpPerCapita>5000) return "Mid";
     return "Emerging";
   }
+  function specificKey(stateCode, theme){ return stateCode+"::"+theme; }
 
-  async function diagnoseCountry(code, force){
-    if(!force && DIAGNOSED[code]) return DIAGNOSED[code];
+  async function fetchGeneralProblems(country, force){
+    if(!force && GENERAL[country]) return GENERAL[country];
     if(!CONFIG.WORKER_URL) throw new Error("CONFIG.WORKER_URL is not set — deploy the worker and set it in index.html");
-    const c = COUNTRIES.find(x=>x[0]===code);
-    const [ , name, region, lat, lon ] = c;
-    const res = await fetch(CONFIG.WORKER_URL+"/problems", {
+    const res = await fetch(CONFIG.WORKER_URL+"/general-problems", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ country:name, region })
+      body: JSON.stringify({ country, force: !!force })
+    });
+    if(!res.ok) throw new Error("general-problems failed: HTTP "+res.status);
+    const json = await res.json();
+    GENERAL[country] = json.generalProblems || [];
+    return GENERAL[country];
+  }
+
+  async function diagnoseSpecific(stateCode, theme, generalStatement, force){
+    const key = specificKey(stateCode, theme);
+    const existing = DIAGNOSED[key];
+    if(!force && existing) return existing;
+    if(!CONFIG.WORKER_URL) throw new Error("CONFIG.WORKER_URL is not set — deploy the worker and set it in index.html");
+    const s = STATES.find(x=>x[0]===stateCode);
+    const [ , name, continent ] = s; // name = actual country; continent = region bucket (North America/Europe/etc.)
+    const res = await fetch(CONFIG.WORKER_URL+"/specific-problems", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ generalTheme:theme, generalStatement, region:name, regionCode:stateCode, country:name, force: !!force })
     });
     if(!res.ok) throw new Error("diagnose failed: HTTP "+res.status);
     const json = await res.json();
-    const stats = COUNTRY_STATS[code] || {};
+    const stats = COUNTRY_STATS[stateCode] || {};
     const items = (json.problems||[]).map((p, i)=>{
       const score = scoreFromFactors(p);
+      const industries = (p.industries||[]).slice().sort((a,b)=>industryPriorityRank(b.priority)-industryPriorityRank(a.priority));
       return {
-        id: code+"-"+i, code, country:name, region, lat, lon,
-        category: p.category, tags: p.tags||[], title: p.title, desc: p.desc, solution: p.solution,
+        id: stateCode+"-"+theme.replace(/\s+/g,'_')+"-"+i, code: stateCode, country:name, continent, state:name, theme, generalStatement,
+        industries, tags: p.tags||[], title: p.title, desc: p.desc, solution: p.solution,
         tam: p.tam_billion_usd, sam: p.sam_billion_usd,
         demand: p.demand, feasibility: p.feasibility, gtmEase: p.gtm_ease, whiteSpace: p.white_space, founderFit: p.founder_fit,
         score, grade: grade(score),
         persona: p.persona, ageRange: p.age_range,
         incomeTier: incomeTierFor(stats.gdpPerCapita),
-        urbanPct: stats.urbanPct, population: stats.population, gdp: stats.gdp, gdpPerCapita: stats.gdpPerCapita
+        urbanPct: stats.urbanPct, population: stats.population, gdp: stats.gdp, gdpPerCapita: stats.gdpPerCapita,
+        groundedByReddit: !!json.groundedByReddit,
+        groundedBySuggest: !!json.groundedBySuggest
       };
     });
     items.sort((a,b)=>b.score-a.score);
-    DIAGNOSED[code] = items;
+    DIAGNOSED[key] = items;
     return items;
   }
 
+  async function fetchProblemDetail(item, force){
+    if(!force && detailCache[item.id]) return detailCache[item.id];
+    const res = await fetch(CONFIG.WORKER_URL+"/problem-detail", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ title:item.title, desc:item.desc, solution:item.solution, region:item.state, country:item.country, force: !!force })
+    });
+    if(!res.ok) throw new Error("detail failed: HTTP "+res.status);
+    const json = await res.json();
+    detailCache[item.id] = json;
+    return json;
+  }
+
+  function stateTopItem(stateCode){
+    let top = null;
+    Object.keys(DIAGNOSED).forEach(key=>{
+      if(!key.startsWith(stateCode+"::")) return;
+      const items = DIAGNOSED[key];
+      if(items.length && (!top || items[0].score>top.score)) top = items[0];
+    });
+    return top;
+  }
   function allDiagnosedItems(){
-    return Object.values(DIAGNOSED).flat();
+    const out = [];
+    Object.values(DIAGNOSED).forEach(items=> out.push(...items));
+    return out;
+  }
+  function allIndustryNames(){
+    const set = new Set();
+    allDiagnosedItems().forEach(it=> (it.industries||[]).forEach(i=>set.add(i.name)));
+    return [...set].sort();
   }
 
   /* ---------------- Render: Map (real country shapes) ---------------- */
@@ -736,11 +896,6 @@
     });
     bgRendered = true;
   }
-  /* Top (highest-score) problem per country — represents that market's headline opportunity */
-  function countryTop(code){
-    const items = DIAGNOSED[code];
-    return items && items.length ? items[0] : null;
-  }
   function renderMap(){
     renderMapBackground();
     const layer = document.getElementById('countryLayer');
@@ -748,27 +903,27 @@
     const tracked = (window.WORLD_MAP_DATA && window.WORLD_MAP_DATA.tracked) || {};
     const tip = document.getElementById('mapTooltip');
     const card = document.querySelector('.map-card');
-    COUNTRIES.forEach(c=>{
-      const code = c[0], name = c[1];
-      const iso = code.toLowerCase();
-      const ds = tracked[iso];
+    STATES.forEach(s=>{
+      const code = s[0], name = s[1];
+      const ds = tracked[code.toLowerCase()];
       if(!ds || !ds.length) return;
-      const top = countryTop(code);
-      const isLoading = diagnosing.has(code);
+      const top = stateTopItem(code);
+      const isLoading = [...diagnosing].some(k=>k.startsWith(code+"::")) || generalLoading.has(name);
+      const count = allDiagnosedItems().filter(it=>it.code===code).length;
       const g = document.createElementNS(SVG_NS,'g');
       g.setAttribute('class', 'country '+(isLoading?'loading':(top?'grade-'+top.grade:'grade-pending')));
       g.setAttribute('tabindex','0');
       g.setAttribute('role','button');
-      g.setAttribute('aria-label', top ? (name+': '+DIAGNOSED[code].length+' trend problems, top grade '+top.grade) : (name+': not yet diagnosed, click to run live AI diagnosis'));
+      g.setAttribute('aria-label', top ? (name+': '+count+' problems diagnosed, top grade '+top.grade) : (name+': not yet diagnosed, click to explore'));
       g.dataset.code = code;
       appendFragments(g, ds);
-      g.addEventListener('click', ()=>openCountryList(code));
-      g.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openCountryList(code); } });
+      g.addEventListener('click', ()=>openStateView(code));
+      g.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openStateView(code); } });
       g.addEventListener('mousemove', e=>{
         const rect = card.getBoundingClientRect();
         tip.style.left = (e.clientX-rect.left)+'px';
         tip.style.top = (e.clientY-rect.top)+'px';
-        tip.textContent = isLoading ? name+' · diagnosing…' : top ? (name+' · '+DIAGNOSED[code].length+' problems · Top grade '+top.grade) : (name+' · click to diagnose live');
+        tip.textContent = isLoading ? name+' · loading…' : top ? (name+' · top grade '+top.grade+' · '+count+' problems') : (name+' · click to explore');
         tip.classList.add('show');
       });
       g.addEventListener('mouseleave', ()=> tip.classList.remove('show'));
@@ -778,17 +933,17 @@
 
   /* ---------------- Render: Region list ---------------- */
   function renderRegionPanel(){
-    const regions = {};
-    COUNTRIES.forEach(c=>{
-      const [code,name,region] = c;
-      (regions[region] = regions[region]||[]).push({code, name});
+    const groups = { "North America":[], "Europe":[], "South America":[], "Asia":[], "Middle East":[], "Africa":[] };
+    STATES.forEach(s=>{
+      const [code,name,region] = s;
+      groups[region].push({code, name});
     });
     const order = ["North America","Europe","South America","Asia","Middle East","Africa"];
     const panel = document.getElementById('regionPanel');
     panel.innerHTML = "";
     order.forEach((r,i)=>{
-      const list = (regions[r]||[]).slice().sort((a,b)=>{
-        const ta = countryTop(a.code), tb = countryTop(b.code);
+      const list = (groups[r]||[]).slice().sort((a,b)=>{
+        const ta = stateTopItem(a.code), tb = stateTopItem(b.code);
         if(ta && tb) return tb.score-ta.score;
         if(ta) return -1;
         if(tb) return 1;
@@ -801,17 +956,17 @@
       summaryEl.innerHTML = `<span>${r}</span><span class="count">${list.length} markets</span>`;
       details.appendChild(summaryEl);
       list.forEach(({code, name})=>{
-        const top = countryTop(code);
-        const isLoading = diagnosing.has(code);
+        const top = stateTopItem(code);
+        const isLoading = [...diagnosing].some(k=>k.startsWith(code+"::")) || generalLoading.has(name);
         const row = document.createElement('div');
         row.className = "region-country";
         row.tabIndex = 0;
-        const badge = isLoading ? `<span class="grade-badge grade-pending">diagnosing…</span>`
+        const badge = isLoading ? `<span class="grade-badge grade-pending">loading…</span>`
           : top ? `<span class="grade-badge grade-${top.grade}">${top.grade} · ${top.score}</span>`
-          : `<span class="grade-badge grade-pending">click to diagnose</span>`;
+          : `<span class="grade-badge grade-pending">explore</span>`;
         row.innerHTML = `<span class="name">${name}</span>${badge}`;
-        row.addEventListener('click', ()=>openCountryList(code));
-        row.addEventListener('keydown', e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openCountryList(code);} });
+        row.addEventListener('click', ()=>openStateView(code));
+        row.addEventListener('keydown', e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openStateView(code);} });
         details.appendChild(row);
       });
       panel.appendChild(details);
@@ -820,32 +975,31 @@
 
   /* ---------------- Render: Rankings table ---------------- */
   let sortState = {key:"score", dir:1};
-  let filters = {q:"", country:"", tags:new Set()};
+  let filters = {q:"", country:"", industries:new Set()};
 
-  function allTags(){
-    const set = new Set();
-    allDiagnosedItems().forEach(it=> (it.tags||[]).forEach(t=>set.add(t)));
-    return [...set].sort();
+  function industryTagsHTML(industries){
+    return (industries||[]).map(i=>`<span class="tag industry-tag pri-${(i.priority||'Low').toLowerCase()}">${i.name} <b>${i.priority}</b></span>`).join('');
   }
   function populateFilterControls(){
     const sel = document.getElementById('rankCountrySelect');
     const existing = new Set([...sel.options].map(o=>o.value));
-    [...COUNTRIES].sort((a,b)=>a[1].localeCompare(b[1])).forEach(c=>{
+    [...STATES].sort((a,b)=>a[1].localeCompare(b[1])).forEach(c=>{
       if(existing.has(c[0])) return;
       const opt = document.createElement('option');
-      opt.value = c[0]; opt.textContent = c[1];
+      opt.value = c[0]; opt.textContent = c[1]+" ("+c[0]+")";
       sel.appendChild(opt);
     });
     const tagWrap = document.getElementById('tagFilters');
-    const existingTags = new Set([...tagWrap.children].map(el=>el.textContent));
-    allTags().forEach(tag=>{
-      if(existingTags.has(tag)) return;
+    const existingTags = new Set([...tagWrap.children].map(el=>el.dataset.industry));
+    allIndustryNames().forEach(name=>{
+      if(existingTags.has(name)) return;
       const chip = document.createElement('button');
       chip.type = "button";
       chip.className = "tag-chip";
-      chip.textContent = tag;
+      chip.textContent = name;
+      chip.dataset.industry = name;
       chip.addEventListener('click', ()=>{
-        if(filters.tags.has(tag)) filters.tags.delete(tag); else filters.tags.add(tag);
+        if(filters.industries.has(name)) filters.industries.delete(name); else filters.industries.add(name);
         chip.classList.toggle('active');
         renderRankings();
       });
@@ -855,9 +1009,10 @@
   function applyFilters(list){
     return list.filter(it=>{
       if(filters.country && it.code!==filters.country) return false;
-      if(filters.tags.size && !it.tags.some(t=>filters.tags.has(t))) return false;
+      if(filters.industries.size && !(it.industries||[]).some(i=>filters.industries.has(i.name))) return false;
       if(filters.q){
-        const hay = (it.country+' '+it.title+' '+it.category+' '+it.tags.join(' ')).toLowerCase();
+        const industryText = (it.industries||[]).map(i=>i.name).join(' ');
+        const hay = (it.state+' '+it.country+' '+it.title+' '+industryText+' '+it.tags.join(' ')).toLowerCase();
         if(!hay.includes(filters.q)) return false;
       }
       return true;
@@ -871,9 +1026,9 @@
     rows.sort((a,b)=>{
       let av,bv;
       if(key==="rank"){ av=a.score; bv=b.score; }
-      else if(key==="country"){ av=a.country; bv=b.country; }
+      else if(key==="country"){ av=a.state; bv=b.state; }
       else if(key==="problem"){ av=a.title; bv=b.title; }
-      else if(key==="category"){ av=a.category; bv=b.category; }
+      else if(key==="category"){ av=(a.industries[0]&&a.industries[0].name)||''; bv=(b.industries[0]&&b.industries[0].name)||''; }
       else if(key==="score"){ av=a.score; bv=b.score; }
       else if(key==="grade"){ av=a.grade; bv=b.grade; }
       else if(key==="tam"){ av=a.tam; bv=b.tam; }
@@ -883,27 +1038,26 @@
     body.innerHTML = "";
     if(!all.length){
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td colspan="8" style="padding:32px 16px;text-align:center;color:var(--text-faint);">No markets diagnosed yet. Click a country on the World Map tab, or hit "Diagnose All Markets" below to run live AI diagnosis on everything.</td>`;
+      tr.innerHTML = `<td colspan="7" style="padding:32px 16px;text-align:center;color:var(--text-faint);">No countries diagnosed yet. Click a country on the map and it'll diagnose live (then stay cached).</td>`;
       body.appendChild(tr);
     } else {
       rows.forEach((it, idx)=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><span class="rank-pos">${idx+1}</span></td>
-          <td>${it.country}</td>
-          <td>${it.title}</td>
-          <td class="num">${it.category}</td>
-          <td><div class="tag-row">${it.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></td>
+          <td>${it.state}<span style="color:var(--text-faint);font-family:var(--font-mono);font-size:11px;"> · ${it.code}</span></td>
+          <td>${it.title}<div class="data-source-note" style="margin:2px 0 0;">${it.theme}</div></td>
+          <td><div class="tag-row">${industryTagsHTML(it.industries)}</div></td>
           <td class="num">${it.score}</td>
           <td><span class="grade-badge grade-${it.grade}">${it.grade}</span></td>
           <td class="num">${fmtUSD(it.tam)}</td>
         `;
-        tr.addEventListener('click', ()=>openDrawer(it.id, it.code));
+        tr.addEventListener('click', ()=>openDrawer(it.id, it.code, it.theme));
         body.appendChild(tr);
       });
     }
-    const diagnosedCount = Object.keys(DIAGNOSED).length;
-    document.getElementById('rankResultCount').textContent = rows.length+" of "+all.length+" problems · "+diagnosedCount+" of "+COUNTRIES.length+" markets diagnosed live";
+    const diagnosedStates = new Set(Object.keys(DIAGNOSED).map(k=>k.split('::')[0])).size;
+    document.getElementById('rankResultCount').textContent = rows.length+" of "+all.length+" problems · "+diagnosedStates+" of "+STATES.length+" countries diagnosed";
   }
   document.querySelectorAll('#rankTable thead th[data-sort]').forEach(th=>{
     th.addEventListener('click', ()=>{
@@ -922,37 +1076,6 @@
     renderRankings();
   });
 
-  /* Diagnose every undiagnosed market, limited concurrency so we don't hammer the API */
-  async function diagnoseAll(){
-    const btn = document.getElementById('diagnoseAllBtn');
-    const todo = COUNTRIES.map(c=>c[0]).filter(code=>!DIAGNOSED[code] && !diagnosing.has(code));
-    if(!todo.length) return;
-    btn.disabled = true;
-    let done = 0;
-    const total = todo.length;
-    const updateProgress = ()=>{ btn.textContent = `Diagnosing… ${done}/${total}`; };
-    updateProgress();
-    const concurrency = 4;
-    let idx = 0;
-    async function worker(){
-      while(idx < todo.length){
-        const code = todo[idx++];
-        diagnosing.add(code);
-        renderMap(); renderRegionPanel();
-        try{ await diagnoseCountry(code); }catch(e){ /* leave undiagnosed, user can retry via map click */ }
-        diagnosing.delete(code);
-        done++;
-        updateProgress();
-        renderMap(); renderRegionPanel(); renderRankings(); populateFilterControls();
-      }
-    }
-    await Promise.all(Array.from({length:concurrency}, worker));
-    btn.textContent = "Diagnose All Markets";
-    btn.disabled = false;
-    stamp();
-  }
-  document.getElementById('diagnoseAllBtn').addEventListener('click', diagnoseAll);
-
   /* ---------------- Drawer ---------------- */
   const overlay = document.getElementById('drawerOverlay');
   const drawer = document.getElementById('drawer');
@@ -967,82 +1090,175 @@
     document.getElementById('drawerClose').focus();
   }
 
-  async function openCountryList(code){
-    const c = COUNTRIES.find(x=>x[0]===code);
-    const name = c[1], region = c[2];
+  /* Level 1: country -> country-wide GENERAL problems (real Trends-ranked, not buildable/graded) */
+  async function openStateView(code, force){
+    const s = STATES.find(x=>x[0]===code);
+    const name = s[1], region = s[2];
     document.querySelectorAll('.country').forEach(p=>p.classList.toggle('active', p.dataset.code===code));
 
-    if(!DIAGNOSED[code]){
+    if(force || !GENERAL[name]){
       drawerContent.innerHTML = `
         <div class="drawer-eyebrow">${region} · ${name}</div>
-        <h2>Diagnosing live…</h2>
-        <div class="sub">Calling OpenAI through the N2M worker to diagnose real, current trend problems for ${name}. Takes a few seconds.</div>
+        <h2>Loading general problems…</h2>
+        <div class="sub">Checking real Google Trends interest for ${name} where available (refreshed daily for US/Canada; AI-proposed elsewhere) and turning the strongest signals into general problem statements.</div>
         <div class="loading-spinner" aria-hidden="true"></div>
       `;
       lastFocused = document.activeElement;
       openDrawerBase();
-      diagnosing.add(code);
+      generalLoading.add(name);
       renderMap(); renderRegionPanel();
       try{
-        await diagnoseCountry(code);
+        await fetchGeneralProblems(name, force);
       }catch(err){
-        diagnosing.delete(code);
+        generalLoading.delete(name);
         renderMap(); renderRegionPanel();
         drawerContent.innerHTML = `
           <div class="drawer-eyebrow">${region} · ${name}</div>
-          <h2>Diagnosis failed</h2>
+          <h2>Couldn't load general problems</h2>
           <div class="sub">${(err && err.message) || "Couldn't reach the worker."} Check that the worker is deployed and CONFIG.WORKER_URL is correct.</div>
           <button class="gen-btn" id="retryDiagnose">Retry</button>
         `;
-        document.getElementById('retryDiagnose').addEventListener('click', ()=>openCountryList(code));
+        document.getElementById('retryDiagnose').addEventListener('click', ()=>openStateView(code, force));
         return;
       }
-      diagnosing.delete(code);
-      renderMap(); renderRegionPanel(); renderRankings(); populateFilterControls(); stamp();
+      generalLoading.delete(name);
+      renderMap(); renderRegionPanel(); stamp();
     }
 
-    const items = DIAGNOSED[code];
+    const generals = GENERAL[name] || [];
+    const anyTrendGrounded = generals.length && generals[0].trendScore != null;
     drawerContent.innerHTML = `
       <div class="drawer-eyebrow">${region} · ${name}</div>
-      <h2>${items.length} trend problems</h2>
-      <div class="sub">Live AI diagnosis, ranked by priority score. Click one to open its full brief.</div>
+      <h2>${generals.length} general problems</h2>
+      <div class="sub">Country-wide themes${anyTrendGrounded ? ", ranked by real Google Trends interest" : " (AI-proposed — no live Trends data tracked for this country)"}. These aren't buildable on their own — click one to break it into specific, buildable problems for ${name}.</div>
       <div class="problem-list">
-        ${items.map(it=>`
-          <button class="problem-row" data-id="${it.id}">
+        ${generals.map(g=>`
+          <button class="problem-row general-row" data-theme="${g.theme}">
             <div class="pr-main">
-              <div class="pr-title">${it.title}</div>
-              <div class="pr-tags">${it.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+              <div class="pr-title">${g.statement}</div>
             </div>
-            <span class="grade-badge grade-${it.grade}">${it.grade} · ${it.score}</span>
+            <span class="trend-badge">${g.trendScore!=null ? "interest "+g.trendScore : "AI-proposed"}</span>
           </button>
         `).join('')}
       </div>
     `;
-    drawerContent.querySelectorAll('.problem-row').forEach(row=>{
-      row.addEventListener('click', ()=>openDrawer(row.dataset.id, code));
+    drawerContent.querySelectorAll('.general-row').forEach(row=>{
+      const g = generals.find(x=>x.theme===row.dataset.theme);
+      row.addEventListener('click', ()=>openGeneralProblem(code, g));
     });
     lastFocused = document.activeElement;
     openDrawerBase();
   }
 
-  function openDrawer(id, fromCode){
-    const it = (DIAGNOSED[fromCode]||[]).find(d=>d.id===id);
+  /* Level 2: state x general theme -> SPECIFIC, buildable problems (MECE breakdown, Reddit+Suggest grounded) */
+  async function openGeneralProblem(code, general, force){
+    const s = STATES.find(x=>x[0]===code);
+    const name = s[1], region = s[2];
+    const key = specificKey(code, general.theme);
+
+    if(force || !DIAGNOSED[key]){
+      drawerContent.innerHTML = `
+        <button class="back-link" id="backToGeneral">← ${name} general problems</button>
+        <div class="drawer-eyebrow">${region} · ${name}</div>
+        <h2>Diagnosing live…</h2>
+        <div class="sub">Breaking "${general.statement}" into specific, buildable problems for ${name}. Takes a few seconds — cached afterward (~30 days).</div>
+        <div class="loading-spinner" aria-hidden="true"></div>
+      `;
+      document.getElementById('backToGeneral').addEventListener('click', ()=>openStateView(code));
+      lastFocused = document.activeElement;
+      openDrawerBase();
+      diagnosing.add(key);
+      renderMap(); renderRegionPanel();
+      try{
+        await diagnoseSpecific(code, general.theme, general.statement, force);
+      }catch(err){
+        diagnosing.delete(key);
+        renderMap(); renderRegionPanel();
+        drawerContent.innerHTML = `
+          <button class="back-link" id="backToGeneral2">← ${name} general problems</button>
+          <div class="drawer-eyebrow">${region} · ${name}</div>
+          <h2>Diagnosis failed</h2>
+          <div class="sub">${(err && err.message) || "Couldn't reach the worker."} Check that the worker is deployed and CONFIG.WORKER_URL is correct.</div>
+          <button class="gen-btn" id="retryDiagnose">Retry</button>
+        `;
+        document.getElementById('backToGeneral2').addEventListener('click', ()=>openStateView(code));
+        document.getElementById('retryDiagnose').addEventListener('click', ()=>openGeneralProblem(code, general, force));
+        return;
+      }
+      diagnosing.delete(key);
+      renderMap(); renderRegionPanel(); renderRankings(); populateFilterControls(); stamp();
+    }
+
+    const items = DIAGNOSED[key];
+    const groundSources = [];
+    if(items.length && items[0].groundedByReddit) groundSources.push("real Reddit discussion");
+    if(items.length && items[0].groundedBySuggest) groundSources.push("real Google search-autocomplete signal");
+    const groundNote = groundSources.length
+      ? "Grounded with "+groundSources.join(" + ")+"."
+      : "No live grounding signal came back for this region — diagnosis is AI reasoning only.";
+    drawerContent.innerHTML = `
+      <button class="back-link" id="backToGeneral3">← ${name} general problems</button>
+      <div class="drawer-eyebrow">${region} · ${name} · ${general.theme}</div>
+      <h2>${items.length} specific problems</h2>
+      <div class="sub">"${general.statement}" broken into specific, buildable problems for ${name}, ranked by priority score.</div>
+      <div class="data-source-note" style="margin-bottom:14px;">${groundNote}</div>
+      <div class="problem-list" id="problemListEl"></div>
+      <button class="gen-btn" id="loadMoreBtn" style="margin-top:12px;"></button>
+    `;
+    document.getElementById('backToGeneral3').addEventListener('click', ()=>openStateView(code));
+    const PAGE_SIZE = 8;
+    let visibleCount = Math.min(PAGE_SIZE, items.length);
+    function renderVisible(){
+      const listEl = document.getElementById('problemListEl');
+      listEl.innerHTML = items.slice(0, visibleCount).map(it=>`
+        <button class="problem-row" data-id="${it.id}">
+          <div class="pr-main">
+            <div class="pr-title">${it.title}</div>
+            <div class="pr-tags">${industryTagsHTML(it.industries)}</div>
+          </div>
+          <span class="grade-badge grade-${it.grade}">${it.grade} · ${it.score}</span>
+        </button>
+      `).join('');
+      listEl.querySelectorAll('.problem-row').forEach(row=>{
+        row.addEventListener('click', ()=>openDrawer(row.dataset.id, code, general.theme));
+      });
+      const moreBtn = document.getElementById('loadMoreBtn');
+      if(visibleCount >= items.length){
+        moreBtn.style.display = 'none';
+      } else {
+        moreBtn.style.display = '';
+        moreBtn.textContent = `Load ${Math.min(PAGE_SIZE, items.length-visibleCount)} more (${items.length-visibleCount} left)`;
+      }
+    }
+    document.getElementById('loadMoreBtn').addEventListener('click', ()=>{
+      visibleCount = Math.min(visibleCount+PAGE_SIZE, items.length);
+      renderVisible();
+    });
+    renderVisible();
+    lastFocused = document.activeElement;
+    openDrawerBase();
+  }
+
+  /* Level 3: single problem detail — scoring + lazy-loaded business plan (platform, competitors, pricing, M1-M12) */
+  async function openDrawer(id, stateCode, theme){
+    const key = theme ? specificKey(stateCode, theme) : null;
+    const it = key ? (DIAGNOSED[key] || []).find(d=>d.id===id) : allDiagnosedItems().find(d=>d.id===id && d.code===stateCode);
     if(!it) return;
     document.querySelectorAll('.country').forEach(p=>p.classList.toggle('active', p.dataset.code===it.code));
     const rec = recommendation(it.grade);
-    const backCode = fromCode || it.code;
+    const backTheme = theme || it.theme;
     drawerContent.innerHTML = `
-      <button class="back-link" id="backToList">← All ${it.country} problems</button>
-      <div class="drawer-eyebrow">${it.region} · ${it.country}</div>
+      <button class="back-link" id="backToList">← ${backTheme} in ${it.state}</button>
+      <div class="drawer-eyebrow">${it.continent} · ${it.state} · ${backTheme}</div>
       <h2>${it.title}</h2>
       <div class="sub">${it.desc}</div>
-      <div class="tag-row" style="margin-bottom:14px;">${it.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <div class="tag-row" style="margin-bottom:14px;">${industryTagsHTML(it.industries)}</div>
 
       <div class="metric-grid">
         <div class="metric"><div class="k">Grade</div><div class="v" style="color:var(--grade-${it.grade==='F'?'d':it.grade.toLowerCase()})">${it.grade}</div></div>
         <div class="metric"><div class="k">Priority Score</div><div class="v">${it.score}/100</div></div>
         <div class="metric"><div class="k">TAM (global)</div><div class="v">${fmtUSD(it.tam)}</div></div>
-        <div class="metric"><div class="k">SAM (${it.country})</div><div class="v">${fmtUSD(it.sam)}</div></div>
+        <div class="metric"><div class="k">SAM (${it.state})</div><div class="v">${fmtUSD(it.sam)}</div></div>
       </div>
 
       <div class="recommend ${rec.cls}">${rec.label}</div>
@@ -1063,20 +1279,25 @@
         <p>${it.solution}</p>
       </section>
 
-      <section>
-        <h3>Demographic snapshot — ${it.country}</h3>
-        <div class="demo-grid">
-          <div><div class="k">Primary buyer</div>${it.persona}</div>
-          <div><div class="k">Age range</div>${it.ageRange}</div>
-          <div><div class="k">Income tier</div>${it.incomeTier}</div>
-          <div><div class="k">Urbanization</div>${it.urbanPct!=null ? Math.round(it.urbanPct)+"% urban" : "—"}</div>
-          <div><div class="k">Population</div>${fmtNum(it.population)}</div>
-          <div><div class="k">GDP / capita</div>${it.gdpPerCapita!=null ? "$"+fmtNum(it.gdpPerCapita) : "—"}</div>
-        </div>
-        <div class="data-source-note">Population, urbanization & GDP figures are live from the World Bank Open Data API.</div>
+      <section id="businessPlanSection">
+        <h3>Business plan detail</h3>
+        <div class="loading-spinner" aria-hidden="true"></div>
       </section>
 
       <section>
+        <h3>Demographic snapshot — ${it.country} (national)</h3>
+        <div class="demographic-strip">
+          <div class="stat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg><div><div class="k">Buyer</div><div class="v">${it.persona}</div></div></div>
+          <div class="stat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><div><div class="k">Age</div><div class="v">${it.ageRange}</div></div></div>
+          <div class="stat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><div><div class="k">Income</div><div class="v">${it.incomeTier}</div></div></div>
+          <div class="stat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg><div><div class="k">Urban</div><div class="v">${it.urbanPct!=null ? Math.round(it.urbanPct)+"%" : "—"}</div></div></div>
+          <div class="stat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><div><div class="k">Population</div><div class="v">${fmtNum(it.population)}</div></div></div>
+          <div class="stat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></svg><div><div class="k">GDP/capita</div><div class="v">${it.gdpPerCapita!=null ? "$"+fmtNum(it.gdpPerCapita) : "—"}</div></div></div>
+        </div>
+        <div class="data-source-note">Population, urbanization & GDP are live figures for ${it.country} from the World Bank Open Data API.</div>
+      </section>
+
+      <section id="briefSection">
         <h3>Generate a tailored brief</h3>
         <textarea class="brief-input" id="briefInput" placeholder="Add constraints or context — budget, team size, timeline, target segment..."></textarea>
         <button class="gen-btn" id="genBtn">Generate Tailored Brief</button>
@@ -1085,8 +1306,94 @@
       </section>
     `;
     document.getElementById('genBtn').addEventListener('click', ()=>generateBrief(it));
-    document.getElementById('backToList').addEventListener('click', ()=>openCountryList(backCode));
+    document.getElementById('backToList').addEventListener('click', ()=>openGeneralProblem(stateCode, {theme:backTheme, statement:it.generalStatement}));
     openDrawerBase();
+    loadBusinessPlan(it);
+  }
+
+  function computeProjection(a){
+    const months = 12;
+    const revenue = [], customers = [];
+    let c = a.startingCustomers;
+    for(let m=0;m<months;m++){
+      if(m>0) c = Math.max(0, c*(1-a.churnPct/100) + a.newCustomers);
+      customers.push(c);
+      revenue.push(c*a.fee);
+    }
+    return {revenue, customers};
+  }
+  function renderProjectionChart(revenue){
+    const max = Math.max(...revenue, 1);
+    const points = revenue.map((v,i)=>{
+      const x = (i/(revenue.length-1))*300;
+      const y = 90 - (v/max)*80;
+      return x.toFixed(1)+","+y.toFixed(1);
+    }).join(' ');
+    const eoyTotal = revenue.reduce((s,v)=>s+v,0);
+    const wrap = document.getElementById('projChartWrap');
+    if(!wrap) return;
+    wrap.innerHTML = `
+      <svg viewBox="0 0 300 100" class="proj-chart" preserveAspectRatio="none">
+        <polyline points="0,90 ${points} 300,90" fill="rgba(228,71,42,0.12)" stroke="none"/>
+        <polyline points="${points}" fill="none" stroke="var(--red-bright)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="proj-labels"><span>M1: $${Math.round(revenue[0]).toLocaleString()}/mo</span><span>M12 MRR: $${Math.round(revenue[11]).toLocaleString()}/mo</span></div>
+    `;
+    document.getElementById('eoyRevenue').textContent = "$"+Math.round(eoyTotal).toLocaleString();
+  }
+  function recomputeFromInputs(){
+    const a = {
+      fee: parseFloat(document.getElementById('inFee').value) || 0,
+      startingCustomers: parseFloat(document.getElementById('inStart').value) || 0,
+      newCustomers: parseFloat(document.getElementById('inNew').value) || 0,
+      churnPct: parseFloat(document.getElementById('inChurn').value) || 0,
+    };
+    const {revenue} = computeProjection(a);
+    renderProjectionChart(revenue);
+  }
+
+  async function loadBusinessPlan(it){
+    const section = document.getElementById('businessPlanSection');
+    try{
+      const d = await fetchProblemDetail(it);
+      if(!document.getElementById('businessPlanSection')) return; // drawer moved on
+      const a = { fee:d.subscription_fee_usd, startingCustomers:d.starting_customers_m1, newCustomers:d.monthly_new_customers, churnPct:d.monthly_churn_rate_pct };
+      const {revenue} = computeProjection(a);
+      section.innerHTML = `
+        <h3>Business plan detail</h3>
+        <div class="demo-grid" style="margin-bottom:12px;">
+          <div><div class="k">Platform</div>${d.platform}</div>
+          <div><div class="k">Subscription fee</div>$${d.subscription_fee_usd}/mo</div>
+        </div>
+        <div class="section-label">Current competitors</div>
+        <div class="competitor-list">
+          ${d.competitors.map(c=>`<div class="competitor-row"><b>${c.name}</b><span>${c.note}</span></div>`).join('')}
+        </div>
+
+        <div class="section-label" style="margin-top:16px;">Month 1–12 revenue projection — edit the assumptions</div>
+        <p class="data-source-note" style="margin:-4px 0 10px;">Defaults are the AI's conservative estimate. Assumes ~$${Math.round(d.monthly_marketing_cost_usd)}/mo marketing spend to sustain this growth rate. Adjust anything below to see it change live — this is a formula, not another AI call.</p>
+        <div class="assumption-grid">
+          <label>Subscription fee ($/mo)<input type="number" id="inFee" value="${a.fee}" min="0" step="1"></label>
+          <label>Starting customers (M1)<input type="number" id="inStart" value="${a.startingCustomers}" min="0" step="1"></label>
+          <label>New customers / month<input type="number" id="inNew" value="${a.newCustomers}" min="0" step="0.5"></label>
+          <label>Monthly churn (%)<input type="number" id="inChurn" value="${a.churnPct}" min="0" max="100" step="1"></label>
+        </div>
+        <div class="proj-chart-wrap" id="projChartWrap"></div>
+        <div class="eoy-row"><span>End-of-year (12-month) total revenue</span><b id="eoyRevenue">$0</b></div>
+        <p class="data-source-note" style="margin-top:10px;">${d.honest_note}</p>
+      `;
+      renderProjectionChart(revenue);
+      ['inFee','inStart','inNew','inChurn'].forEach(id=>{
+        document.getElementById(id).addEventListener('input', recomputeFromInputs);
+      });
+    }catch(err){
+      section.innerHTML = `
+        <h3>Business plan detail</h3>
+        <div class="sub">Couldn't load business plan detail. <button class="back-link" id="retryPlan" style="display:inline;">Retry</button></div>
+      `;
+      const retry = document.getElementById('retryPlan');
+      if(retry) retry.addEventListener('click', ()=>loadBusinessPlan(it));
+    }
   }
   function scoreRow(label, val){
     const pct = (val/5*100).toFixed(0);
@@ -1102,6 +1409,7 @@
   }
   overlay.addEventListener('click', closeDrawer);
   document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  document.getElementById('printBtn').addEventListener('click', ()=>window.print());
   document.addEventListener('keydown', e=>{ if(e.key==="Escape" && drawer.classList.contains('open')) closeDrawer(); });
 
   /* ---------------- AI brief generation (stubbed, ready for OpenAI) ---------------- */
@@ -1116,7 +1424,7 @@
         const res = await fetch(CONFIG.WORKER_URL, {
           method:"POST",
           headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ title:item.title, country:item.country, desc:item.desc, notes })
+          body: JSON.stringify({ title:item.title, country:item.state+", "+item.country, desc:item.desc, notes })
         });
         if(!res.ok) throw new Error("worker responded "+res.status);
         const json = await res.json();
@@ -1152,25 +1460,28 @@
     document.getElementById('problemCount').textContent = Object.keys(DIAGNOSED).length;
   }
   async function initialLoad(){
-    document.getElementById('countryCount').textContent = COUNTRIES.length;
+    document.getElementById('countryCount').textContent = STATES.length;
     renderMap();
     renderRegionPanel();
     renderRankings();
     populateFilterControls();
     stamp();
-    await fetchWorldBankStats(); // real, live World Bank data — independent of any country diagnosis
+    await fetchWorldBankStats(); // real, live World Bank data — independent of any diagnosis
     stamp();
   }
   document.getElementById('refreshBtn').addEventListener('click', async function(){
     this.classList.add('spinning');
     this.disabled = true;
     await fetchWorldBankStats();
-    const codes = Object.keys(DIAGNOSED);
-    for(const code of codes){
-      diagnosing.add(code);
+    const keys = Object.keys(DIAGNOSED);
+    for(const key of keys){
+      const [code, theme] = key.split('::');
+      const items = DIAGNOSED[key];
+      const generalStatement = items.length ? items[0].generalStatement : '';
+      diagnosing.add(key);
       renderMap(); renderRegionPanel();
-      try{ await diagnoseCountry(code, true); }catch(e){ /* keep prior data for this market if a re-diagnose fails */ }
-      diagnosing.delete(code);
+      try{ await diagnoseSpecific(code, theme, generalStatement, true); }catch(e){ /* keep prior data if a re-diagnose fails */ }
+      diagnosing.delete(key);
     }
     renderMap(); renderRegionPanel(); renderRankings(); populateFilterControls(); stamp();
     this.classList.remove('spinning');

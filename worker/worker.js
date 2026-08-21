@@ -205,46 +205,71 @@ async function fetchSuggestSignal(region) {
 }
 
 // ---------------- /general-problems ----------------
+// US/CA: real Trends-ranked (see THEME_POOL + daily cron). Every other country: no
+// real search-interest data backs it (extending live Trends tracking to dozens of
+// countries would blow the free SerpApi tier) — the AI proposes general problems
+// directly instead, honestly flagged trendGrounded:false. Same worker, same cost,
+// no new secrets — just an honest quality difference depending on country.
+const AI_ONLY_GENERAL_CACHE_TTL_SECONDS = 60 * 60 * 24 * 14; // 14 days — no live signal to go stale against
+
 async function handleGeneralProblems(env, body, corsHeaders) {
   const { country } = body || {};
+  if (!country) return new Response('Missing country', { status: 400, headers: corsHeaders });
   const geo = COUNTRY_GEO[country];
-  if (!geo) return new Response('Missing/unknown country', { status: 400, headers: corsHeaders });
 
-  const cacheKey = `general:${geo}`;
+  const cacheKey = `general:${geo || country}`;
   if (!body.force && env.OEO_CACHE) {
     const cached = await env.OEO_CACHE.get(cacheKey);
     if (cached) return new Response(cached, { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Cache': 'HIT' } });
   }
 
-  let trendData = env.OEO_CACHE ? await env.OEO_CACHE.get(`trendscores:${geo}`, 'json') : null;
-  if (!trendData) {
-    // Bootstrap: no cron run yet for this geo — fetch live now (costs real SerpApi credits once).
-    const fresh = await refreshTrendScores(env);
-    trendData = { scores: fresh[geo], updatedAt: Date.now() };
-  }
-  const scores = trendData.scores || {};
-  const ranked = THEME_POOL.map(t => ({ theme: t, score: scores[t] || 0 })).sort((a, b) => b.score - a.score);
-  const top = ranked.slice(0, 14).filter(r => r.score > 0);
-  if (!top.length) return new Response('No trend data available yet', { status: 503, headers: corsHeaders });
+  let responseBody, ttl;
 
-  const sys = 'You turn raw trend-topic keywords into properly framed GENERAL business problem statements for small/micro business owners. A general statement names the symptom area — it is NOT a buildable product on its own (no numbers, no build spec). You answer only with valid JSON, no markdown fences.';
-  const user = `Country: ${country}. These topics showed real, measured search interest (Google Trends, past 30 days, ranked highest first — score is search volume relative to a "small business owner" baseline, so 100 = same interest as that baseline phrase, higher = more searched):
+  if (geo) {
+    // Real Trends-ranked path (US/CA)
+    let trendData = env.OEO_CACHE ? await env.OEO_CACHE.get(`trendscores:${geo}`, 'json') : null;
+    if (!trendData) {
+      // Bootstrap: no cron run yet for this geo — fetch live now (costs real SerpApi credits once).
+      const fresh = await refreshTrendScores(env);
+      trendData = { scores: fresh[geo], updatedAt: Date.now() };
+    }
+    const scores = trendData.scores || {};
+    const ranked = THEME_POOL.map(t => ({ theme: t, score: scores[t] || 0 })).sort((a, b) => b.score - a.score);
+    const top = ranked.slice(0, 14).filter(r => r.score > 0);
+    if (!top.length) return new Response('No trend data available yet', { status: 503, headers: corsHeaders });
+
+    const sys = 'You turn raw trend-topic keywords into properly framed GENERAL business problem statements for small/micro business owners. A general statement names the symptom area — it is NOT a buildable product on its own (no numbers, no build spec). You answer only with valid JSON, no markdown fences.';
+    const user = `Country: ${country}. These topics showed real, measured search interest (Google Trends, past 30 days, ranked highest first — score is search volume relative to a "small business owner" baseline, so 100 = same interest as that baseline phrase, higher = more searched):
 ${top.map((r, i) => `${i + 1}. "${r.theme}" (relative interest ${r.score})`).join('\n')}
 
 For each, write a proper general problem statement — the symptom small/micro business owners face, one sentence, specific enough to be meaningful but NOT a product spec. Return strict JSON:
 {"generalProblems":[{"theme":"the original topic keyword, exact match","statement":"one-sentence general problem statement","trendScore":number (the interest score given above)}]}
 Same order as given (highest interest first). JSON only.`;
 
-  const content = await callOpenAI(env, [{ role: 'system', content: sys }, { role: 'user', content: user }], true);
-  let parsed;
-  try {
-    parsed = JSON.parse(content);
-  } catch {
-    throw new Error('Model returned invalid JSON');
+    const content = await callOpenAI(env, [{ role: 'system', content: sys }, { role: 'user', content: user }], true);
+    let parsed;
+    try { parsed = JSON.parse(content); } catch { throw new Error('Model returned invalid JSON'); }
+    parsed.updatedAt = trendData.updatedAt;
+    parsed.trendGrounded = true;
+    responseBody = JSON.stringify(parsed);
+    ttl = GENERAL_CACHE_TTL_SECONDS;
+  } else {
+    // AI-only path (every other N2M country) — no real search-interest data, said so plainly.
+    const sys = 'You propose GENERAL business problem statements for small/micro business owners in a given country, drawing on your general knowledge (NOT live search data — none is available for this country). A general statement names a symptom area — it is NOT a buildable product on its own. You answer only with valid JSON, no markdown fences.';
+    const user = `Country: ${country}. Propose 14 general problem themes/statements that small and micro business owners (1-15 employees) in this country plausibly face, covering a realistic mix (financing, hiring, marketing, compliance, cost pressures, technology adoption, competition, etc — tailored to what's actually relevant for this country/region, not a generic US-centric list). Return strict JSON:
+{"generalProblems":[{"theme":"2-4 word topic label","statement":"one-sentence general problem statement, specific enough to be meaningful but NOT a product spec"}]}
+Exactly 14 items, no numeric trend score (there is none). JSON only.`;
+    const content = await callOpenAI(env, [{ role: 'system', content: sys }, { role: 'user', content: user }], true);
+    let parsed;
+    try { parsed = JSON.parse(content); } catch { throw new Error('Model returned invalid JSON'); }
+    parsed.updatedAt = Date.now();
+    parsed.trendGrounded = false;
+    (parsed.generalProblems || []).forEach(g => { g.trendScore = null; });
+    responseBody = JSON.stringify(parsed);
+    ttl = AI_ONLY_GENERAL_CACHE_TTL_SECONDS;
   }
-  parsed.updatedAt = trendData.updatedAt;
-  const responseBody = JSON.stringify(parsed);
-  if (env.OEO_CACHE) await env.OEO_CACHE.put(cacheKey, responseBody, { expirationTtl: GENERAL_CACHE_TTL_SECONDS });
+
+  if (env.OEO_CACHE) await env.OEO_CACHE.put(cacheKey, responseBody, { expirationTtl: ttl });
   return new Response(responseBody, { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Cache': 'MISS' } });
 }
 
